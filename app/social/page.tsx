@@ -24,9 +24,9 @@ const primarySocials: SocialLink[] = [
     },
     {
         name: "YouTube",
-        handle: "@buntbaby420",
+        handle: "@bluntbaby420",
         description: "Long-form content, VODs, and highlight edits.",
-        url: "https://www.youtube.com/@buntbaby420",
+        url: "https://www.youtube.com/@bluntbaby420",
         accent: "red",
         tag: "VODs & highlights",
         platform: "youtube",
