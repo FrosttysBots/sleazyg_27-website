@@ -1,11 +1,11 @@
 ﻿"use client";
 
 import { useEffect, useState } from "react";
+import "./clips.css";
 
 type Clip = {
     id: string;
     url: string;
-    // embedUrl: string; // no longer needed
     title: string;
     thumbnailUrl: string;
     viewCount: number;
@@ -13,19 +13,27 @@ type Clip = {
     duration: number;
 };
 
+type ClipsResponse = {
+    clips: Clip[];
+    cursor: string | null;
+};
+
 export default function ClipsPage() {
     const [clips, setClips] = useState<Clip[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [activeClipId, setActiveClipId] = useState<string | null>(null);
+    const [nextCursor, setNextCursor] = useState<string | null>(null);
 
     useEffect(() => {
-        async function loadClips() {
+        async function loadInitial() {
             try {
                 const res = await fetch("/api/twitch/clips");
                 if (!res.ok) throw new Error("Failed to load clips");
-                const data = await res.json();
+                const data = (await res.json()) as ClipsResponse;
                 setClips(data.clips || []);
+                setNextCursor(data.cursor ?? null);
             } catch (err) {
                 console.error(err);
                 setError("Could not load clips right now.");
@@ -34,8 +42,28 @@ export default function ClipsPage() {
             }
         }
 
-        loadClips();
+        loadInitial();
     }, []);
+
+    async function loadMore() {
+        if (!nextCursor) return;
+        setLoadingMore(true);
+        try {
+            const res = await fetch(
+                `/api/twitch/clips?cursor=${encodeURIComponent(nextCursor)}`
+            );
+            if (!res.ok) throw new Error("Failed to load more clips");
+            const data = (await res.json()) as ClipsResponse;
+
+            setClips((prev) => [...prev, ...(data.clips || [])]);
+            setNextCursor(data.cursor ?? null);
+        } catch (err) {
+            console.error(err);
+            // You could set an error state here if you want a message.
+        } finally {
+            setLoadingMore(false);
+        }
+    }
 
     function formatDate(iso: string) {
         return new Date(iso).toLocaleDateString();
@@ -55,10 +83,8 @@ export default function ClipsPage() {
     }
 
     // IMPORTANT: Twitch expects just the domain here (no https, no trailing slash)
-    const TWITCH_PARENT =
-        process.env.NEXT_PUBLIC_TWITCH_PARENT ?? "localhost";
+    const TWITCH_PARENT = "sleazyg-27-website.vercel.app";
 
-    // Build a proper clip embed URL from the clip ID
     function getEmbedSrc(clipId: string) {
         return `https://clips.twitch.tv/embed?clip=${encodeURIComponent(
             clipId
@@ -132,6 +158,20 @@ export default function ClipsPage() {
                     );
                 })}
             </div>
+
+            {/* Load more button */}
+            {!loading && !error && nextCursor && (
+                <div className="clips-load-more">
+                    <button
+                        type="button"
+                        onClick={loadMore}
+                        disabled={loadingMore}
+                        className="clips-load-more-btn"
+                    >
+                        {loadingMore ? "Loading more..." : "Load more clips"}
+                    </button>
+                </div>
+            )}
         </div>
     );
 }

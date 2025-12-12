@@ -3,9 +3,9 @@
     top: 0;
     z-index: 40;
     backdrop-filter: blur(12px);
-    background: linear-gradient( to bottom, rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0.88) );
-    border-bottom: 1px solid rgba(15, 23, 42, 1);
-    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.8), 0 0 0 1px rgba(15, 23, 42, 0.9);
+    background: linear-gradient( 180deg, #002AFF 0%, #1B3CFF 45%, #0A1A66 100% );
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 10px rgba(0, 42, 255, 0.35);
 }
 
 .navbar-inner {
@@ -30,8 +30,8 @@
     width: 18px;
     height: 18px;
     border-radius: 999px;
-    background: radial-gradient(circle at center, #a855f7, #4f46e5);
-    box-shadow: 0 0 10px rgba(129, 140, 248, 0.9), 0 0 22px rgba(129, 140, 248, 0.6);
+    background: radial-gradient(circle at center, #002AFF, #335CFF);
+    box-shadow: 0 0 10px rgba(0, 42, 255, 0.9), 0 0 22px rgba(91, 127, 255, 0.7);
 }
 
 .nav-brand-text {
@@ -75,7 +75,7 @@
         bottom: 0;
         height: 2px;
         border-radius: 999px;
-        background: linear-gradient(to right, #a855f7, #6366f1, #22d3ee);
+        background: linear-gradient(to right, #002AFF, #335CFF, #00B7FF);
         transform: scaleX(0);
         transform-origin: center;
         transition: transform 0.15s ease;
@@ -199,7 +199,7 @@
 }
 
 .nav-mobile-link-active {
-    background: radial-gradient( circle at left, rgba(79, 70, 229, 0.45), rgba(15, 23, 42, 0.96) );
+    background: radial-gradient( circle at left, rgba(0, 42, 255, 0.5), rgba(15, 23, 42, 0.96) );
 }
 
 .nav-mobile-twitch {

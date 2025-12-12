@@ -1,13 +1,13 @@
 ﻿import "./social.css";
 
-type Platform = "twitch" | "youtube" | "instagram" | "tiktok" | "x";
+type Platform = "twitch" | "youtube" | "instagram" | "tiktok" | "x" | "snapchat";
 
 type SocialLink = {
     name: string;
     handle: string;
     description: string;
     url: string;
-    accent: "purple" | "red" | "pink" | "green" | "blue";
+    accent: "purple" | "red" | "pink" | "green" | "blue" | "yellow";
     tag?: string;
     platform: Platform;
 };
@@ -59,15 +59,21 @@ const secondarySocials: SocialLink[] = [
         accent: "blue",
         platform: "x",
     },
+    {
+        name: "Snapchat",
+        handle: "@sleazyg_27",
+        description: "Behind-the-scenes snaps, quick updates, and daily vibes.",
+        url: "https://www.snapchat.com/add/sleazyg_27",
+        accent: "yellow",
+        platform: "snapchat",
+    },
 ];
 
 const allSocials: SocialLink[] = [...primarySocials, ...secondarySocials];
 
-const TWITCH_PARENT =
-    process.env.NEXT_PUBLIC_TWITCH_PARENT ?? "localhost";
+const TWITCH_PARENT = process.env.NEXT_PUBLIC_TWITCH_PARENT ?? "localhost";
 
 const twitchEmbedSrc = `https://player.twitch.tv/?channel=SleazyG_27&parent=${TWITCH_PARENT}&muted=true`;
-
 
 // TODO: replace VIDEO_ID_HERE with a real video or playlist ID
 const youtubeEmbedSrc = "https://www.youtube.com/embed/pLoDxSjqsZ8";
@@ -108,7 +114,14 @@ function SocialIcon({ platform }: { platform: Platform }) {
                         strokeWidth="1.8"
                         fill="none"
                     />
-                    <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.6" fill="none" />
+                    <circle
+                        cx="12"
+                        cy="12"
+                        r="4"
+                        stroke="currentColor"
+                        strokeWidth="1.6"
+                        fill="none"
+                    />
                     <circle cx="17" cy="7" r="1.3" fill="currentColor" />
                 </svg>
             );
@@ -130,6 +143,17 @@ function SocialIcon({ platform }: { platform: Platform }) {
                     />
                 </svg>
             );
+
+        case "snapchat":
+            return (
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                        d="M12 2c2.6 0 4.7 2.1 4.7 4.7v3.2c0 .7.6 1.3 1.3 1.3h.5c.5 0 .9.4.9.9 0 .3-.2.6-.5.8-.6.3-1.3.4-2 .5-.4 1.7-1.5 3.2-3 4.1l.3 1.4c.1.5-.2 1-.7 1.1-.7.1-1.4.2-2.1.2s-1.4-.1-2.1-.2c-.5-.1-.8-.6-.7-1.1l.3-1.4c-1.5-.9-2.6-2.4-3-4.1-.7-.1-1.4-.2-2-.5-.3-.2-.5-.5-.5-.8 0-.5.4-.9.9-.9H6c.7 0 1.3-.6 1.3-1.3V6.7C7.3 4.1 9.4 2 12 2z"
+                        fill="currentColor"
+                    />
+                </svg>
+            );
+
         default:
             return null;
     }

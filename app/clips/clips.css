@@ -1,0 +1,28 @@
+.clips-load-more {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.clips-load-more-btn {
+    padding: 10px 20px;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.9);
+    background: radial-gradient(circle at top left, #002AFF, #335CFF);
+    box-shadow: 0 12px 30px rgba(0, 42, 255, 0.45);
+    color: #f9fafb;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+    .clips-load-more-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.95);
+    }
+
+    .clips-load-more-btn:disabled {
+        opacity: 0.7;
+        cursor: default;
+    }

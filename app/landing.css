@@ -19,12 +19,12 @@
     z-index: 1;
 }
 
-/* Dark color overlay for readability */
+/* Dark color overlay for readability, now blue themed */
 .landing-overlay {
     position: absolute;
     inset: 0;
     z-index: 2;
-    background: linear-gradient( to bottom, rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.9) ), radial-gradient( circle at 15% 20%, rgba(168, 85, 247, 0.35), transparent 55% ), radial-gradient( circle at 85% 75%, rgba(56, 189, 248, 0.3), transparent 55% );
+    background: linear-gradient( to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.95) ), radial-gradient( circle at 15% 20%, rgba(0, 42, 255, 0.35), transparent 55% ), radial-gradient( circle at 85% 75%, rgba(91, 127, 255, 0.28), transparent 55% );
     mix-blend-mode: normal;
 }
 
@@ -64,7 +64,7 @@
     font-weight: 800;
     letter-spacing: 0.04em;
     color: #ffffff;
-    text-shadow: 0 0 32px rgba(15, 23, 42, 0.9);
+    text-shadow: 0 0 32px rgba(2, 6, 23, 0.9);
 }
 
 .hero-subtitle {
@@ -98,18 +98,18 @@
     transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
 
-/* Primary glowing button */
+/* Primary glowing button (blue now) */
 .hero-btn-primary {
-    background: radial-gradient(circle at top left, #a855f7, #6366f1);
+    background: radial-gradient(circle at top left, #002AFF, #335CFF);
     color: #ffffff;
     border-color: rgba(248, 250, 252, 0.85);
-    box-shadow: 0 0 14px rgba(129, 140, 248, 0.7), 0 0 30px rgba(129, 140, 248, 0.3);
+    box-shadow: 0 0 14px rgba(0, 42, 255, 0.55), 0 0 34px rgba(0, 42, 255, 0.25);
     animation: heroGlow 2.4s ease-in-out infinite;
 }
 
     .hero-btn-primary:hover {
         transform: translateY(-2px) scale(1.03);
-        box-shadow: 0 0 18px rgba(129, 140, 248, 0.95), 0 0 38px rgba(129, 140, 248, 0.5);
+        box-shadow: 0 0 18px rgba(0, 42, 255, 0.95), 0 0 38px rgba(91, 127, 255, 0.5);
     }
 
 /* Ghost secondary button */
@@ -199,7 +199,7 @@
         transform: translateY(-2px);
         border-color: rgba(96, 165, 250, 0.9);
         box-shadow: 0 10px 24px rgba(15, 23, 42, 0.9);
-        background: radial-gradient( circle at top left, rgba(59, 130, 246, 0.28), rgba(15, 23, 42, 0.95) );
+        background: radial-gradient( circle at top left, rgba(0, 42, 255, 0.25), rgba(15, 23, 42, 0.95) );
     }
 
 .preview-chip-label {
@@ -266,7 +266,7 @@
         transform: translateY(-3px);
         border-color: rgba(96, 165, 250, 0.9);
         box-shadow: 0 12px 26px rgba(15, 23, 42, 0.9);
-        background: radial-gradient( circle at top left, rgba(56, 189, 248, 0.18), rgba(15, 23, 42, 0.98) );
+        background: radial-gradient( circle at top left, rgba(0, 42, 255, 0.18), rgba(15, 23, 42, 0.98) );
     }
 
 /* Animations */
@@ -282,17 +282,18 @@
     }
 }
 
+/* Blue-tuned glow animation for the primary button */
 @keyframes heroGlow {
     0% {
-        box-shadow: 0 0 12px rgba(129, 140, 248, 0.6), 0 0 24px rgba(129, 140, 248, 0.4);
+        box-shadow: 0 0 12px rgba(0, 42, 255, 0.6), 0 0 24px rgba(91, 127, 255, 0.45);
     }
 
     50% {
-        box-shadow: 0 0 20px rgba(129, 140, 248, 0.95), 0 0 40px rgba(129, 140, 248, 0.55);
+        box-shadow: 0 0 20px rgba(0, 42, 255, 0.95), 0 0 40px rgba(91, 127, 255, 0.6);
     }
 
     100% {
-        box-shadow: 0 0 12px rgba(129, 140, 248, 0.6), 0 0 24px rgba(129, 140, 248, 0.4);
+        box-shadow: 0 0 12px rgba(0, 42, 255, 0.6), 0 0 24px rgba(91, 127, 255, 0.45);
     }
 }
 
@@ -309,7 +310,7 @@
 .live-card {
     border-radius: 20px;
     background: rgba(15, 23, 42, 0.96);
-    border: 1px solid rgba(129, 140, 248, 0.6);
+    border: 1px solid rgba(0, 42, 255, 0.6);
     box-shadow: 0 20px 40px rgba(15, 23, 42, 0.9);
     padding: 14px 16px 16px;
     display: flex;
@@ -410,15 +411,15 @@
     border-radius: 14px;
     font-size: 0.86rem;
     text-decoration: none;
-    background: radial-gradient(circle at top left, #a855f7, #6366f1);
+    background: radial-gradient(circle at top left, #002AFF, #335CFF);
     color: #ffffff;
-    box-shadow: 0 0 16px rgba(129, 140, 248, 0.7);
+    box-shadow: 0 0 16px rgba(0, 42, 255, 0.7);
     transition: transform 0.16s ease, box-shadow 0.16s ease;
 }
 
     .live-watch-link:hover {
         transform: translateY(-1px) scale(1.02);
-        box-shadow: 0 0 22px rgba(129, 140, 248, 1);
+        box-shadow: 0 0 22px rgba(0, 42, 255, 0.95);
     }
 
 /* Offline pill style */
@@ -442,14 +443,12 @@
     object-fit: cover;
 }
 
-
 /* responsive tweak for live section */
 @media (max-width: 900px) {
     .live-body {
         grid-template-columns: minmax(0, 1fr);
     }
 }
-
 
 /* Responsive tweaks */
 @media (max-width: 900px) {

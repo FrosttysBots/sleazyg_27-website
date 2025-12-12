@@ -87,7 +87,7 @@ async function getBroadcasterId(token: string, login: string) {
 
 /* ---------------------- ROUTE HANDLER ---------------------- */
 
-export async function GET() {
+export async function GET(req: Request) {
     try {
         const userLogin = process.env.TWITCH_USER_LOGIN;
 
@@ -98,19 +98,29 @@ export async function GET() {
             );
         }
 
+        // Read optional cursor from query string
+        const url = new URL(req.url);
+        const cursor = url.searchParams.get("cursor") ?? undefined;
+
         const token = await getAppAccessToken();
         const broadcasterId = await getBroadcasterId(token, userLogin);
 
-        const res = await fetch(
-            `${TWITCH_CLIPS_URL}?broadcaster_id=${broadcasterId}&first=12`,
-            {
-                headers: {
-                    "Client-ID": process.env.TWITCH_CLIENT_ID || "",
-                    Authorization: `Bearer ${token}`,
-                },
-                cache: "no-store",
-            }
-        );
+        // Build clips request with optional pagination
+        const params = new URLSearchParams();
+        params.set("broadcaster_id", broadcasterId);
+        params.set("first", "12"); // page size
+
+        if (cursor) {
+            params.set("after", cursor);
+        }
+
+        const res = await fetch(`${TWITCH_CLIPS_URL}?${params.toString()}`, {
+            headers: {
+                "Client-ID": process.env.TWITCH_CLIENT_ID || "",
+                Authorization: `Bearer ${token}`,
+            },
+            cache: "no-store",
+        });
 
         if (!res.ok) {
             throw new Error("Failed to fetch Twitch clips");
@@ -121,7 +131,8 @@ export async function GET() {
         const clips = (data.data as TwitchClip[]).map((clip) => ({
             id: clip.id,
             url: clip.url,
-            embedUrl: clip.embed_url,
+            // We do not need embedUrl on the client any more.
+            // We build the embed URL in the frontend from clip.id.
             title: clip.title,
             thumbnailUrl: clip.thumbnail_url,
             viewCount: clip.view_count,
@@ -129,11 +140,13 @@ export async function GET() {
             duration: clip.duration,
         }));
 
-        return NextResponse.json({ clips });
+        const nextCursor = data.pagination?.cursor ?? null;
+
+        return NextResponse.json({ clips, cursor: nextCursor });
     } catch (err) {
         console.error("Error in Twitch Clips API:", err);
         return NextResponse.json(
-            { error: "Failed to fetch Twitch clips" },
+            { error: "Failed to fetch Twitch clips", clips: [], cursor: null },
             { status: 500 }
         );
     }
