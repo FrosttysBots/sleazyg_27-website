@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import Navbar from "./components/Navbar"; // adjust path if yours is different
 
@@ -91,6 +92,7 @@ export default function RootLayout({
                 <Navbar />
                 {children}
                 <Footer />
+                <SpeedInsights />
             </body>
         </html>
     );
