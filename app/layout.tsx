@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "./components/Navbar"; // adjust path if yours is different
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
     title: "SleazyG_27 Hub",
@@ -91,6 +92,7 @@ export default function RootLayout({
                 <Navbar />
                 {children}
                 <Footer />
+                <Analytics />
             </body>
         </html>
     );
