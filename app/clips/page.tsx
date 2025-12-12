@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 type Clip = {
     id: string;
     url: string;
-    embedUrl: string;
+    // embedUrl: string; // no longer needed
     title: string;
     thumbnailUrl: string;
     viewCount: number;
@@ -42,8 +42,8 @@ export default function ClipsPage() {
     }
 
     function formatViews(v: number) {
-        if (v >= 1000000) return (v / 1000000).toFixed(1) + "M views";
-        if (v >= 1000) return (v / 1000).toFixed(1) + "K views";
+        if (v >= 1_000_000) return (v / 1_000_000).toFixed(1) + "M views";
+        if (v >= 1_000) return (v / 1_000).toFixed(1) + "K views";
         return v + " views";
     }
 
@@ -54,14 +54,20 @@ export default function ClipsPage() {
         return `${m}:${s.toString().padStart(2, "0")}`;
     }
 
-    // For Twitch embed, you must include your domain as `parent`
-    // In dev we use localhost; in production change this.
-    const TWITCH_PARENT = "https://sleazyg-27-website.vercel.app/"; // change to your domain when deployed
+    // IMPORTANT: Twitch expects just the domain here (no https, no trailing slash)
+    const TWITCH_PARENT = "sleazyg-27-website.vercel.app";
+
+    // Build a proper clip embed URL from the clip ID
+    function getEmbedSrc(clipId: string) {
+        return `https://clips.twitch.tv/embed?clip=${encodeURIComponent(
+            clipId
+        )}&parent=${TWITCH_PARENT}&autoplay=true&muted=true`;
+    }
 
     return (
         <div className="clips-container">
             <header className="clips-header">
-                <h1 className="clips-title">Clips & Highlights</h1>
+                <h1 className="clips-title">Clips &amp; Highlights</h1>
                 <p className="clips-subtitle">
                     Pulled directly from Sleazy&apos;s Twitch channel. Hover to preview,
                     click to watch on Twitch.
@@ -77,7 +83,7 @@ export default function ClipsPage() {
             <div className="clips-grid">
                 {clips.map((clip) => {
                     const isActive = activeClipId === clip.id;
-                    const embedSrc = `${clip.embedUrl}&parent=${TWITCH_PARENT}&autoplay=true&muted=true`;
+                    const embedSrc = getEmbedSrc(clip.id);
 
                     return (
                         <a
@@ -95,7 +101,7 @@ export default function ClipsPage() {
                                         className="clip-embed"
                                         src={embedSrc}
                                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture"
-                                        allowFullScreen={false}
+                                        allowFullScreen
                                         title={clip.title}
                                     />
                                 ) : (
