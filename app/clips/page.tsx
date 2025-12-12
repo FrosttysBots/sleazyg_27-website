@@ -56,7 +56,7 @@ export default function ClipsPage() {
 
     // For Twitch embed, you must include your domain as `parent`
     // In dev we use localhost; in production change this.
-    const TWITCH_PARENT = "localhost"; // change to your domain when deployed
+    const TWITCH_PARENT = "https://sleazyg-27-website.vercel.app/"; // change to your domain when deployed
 
     return (
         <div className="clips-container">
