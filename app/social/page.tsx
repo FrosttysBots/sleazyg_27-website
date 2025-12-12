@@ -63,8 +63,11 @@ const secondarySocials: SocialLink[] = [
 
 const allSocials: SocialLink[] = [...primarySocials, ...secondarySocials];
 
-const twitchEmbedSrc =
-    "https://player.twitch.tv/?channel=SleazyG_27&parent=localhost&parent=sleazyg-27-website.vercel.app&muted=true";
+const TWITCH_PARENT =
+    process.env.NEXT_PUBLIC_TWITCH_PARENT ?? "localhost";
+
+const twitchEmbedSrc = `https://player.twitch.tv/?channel=SleazyG_27&parent=${TWITCH_PARENT}&muted=true`;
+
 
 // TODO: replace VIDEO_ID_HERE with a real video or playlist ID
 const youtubeEmbedSrc = "https://www.youtube.com/embed/pLoDxSjqsZ8";
