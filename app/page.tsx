@@ -54,7 +54,7 @@ export default function Home() {
     const isLive = !!liveStatus?.live;
     const hasVod = !isLive && !!liveStatus?.lastVod;
     const vod = liveStatus?.lastVod;
-    const twitchParent = "localhost"; // change to your real domain when deployed
+    const twitchParent = "https://sleazyg-27-website.vercel.app/"; // change to your real domain when deployed
 
     return (
         <main className="landing-container">
