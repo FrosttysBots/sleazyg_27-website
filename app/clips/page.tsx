@@ -36,7 +36,7 @@ export default function ClipsPage() {
     useEffect(() => {
         async function loadInitial() {
             try {
-                const res = await fetch("/api/twitch/clips?first=12&days=3650");
+                const res = await fetch("/api/twitch/clips?first=12&days=3650&sort=views");
                 if (!res.ok) throw new Error("Failed to load clips");
 
                 const data = (await res.json()) as ClipsResponse;
@@ -61,7 +61,7 @@ export default function ClipsPage() {
 
         try {
             const res = await fetch(
-                `/api/twitch/clips?first=12&days=3650&after=${encodeURIComponent(
+                `/api/twitch/clips?first=12&days=3650&sort=views&after=${encodeURIComponent(
                     nextCursor
                 )}`
             );
@@ -82,11 +82,7 @@ export default function ClipsPage() {
                 const byId = new Map<string, Clip>();
                 for (const c of merged) byId.set(c.id, c);
 
-                return Array.from(byId.values()).sort(
-                    (a, b) =>
-                        new Date(b.createdAt).getTime() -
-                        new Date(a.createdAt).getTime()
-                );
+                return Array.from(byId.values());
             });
 
             setNextCursor(data.cursor ?? null);

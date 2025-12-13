@@ -98,6 +98,9 @@ export async function GET(req: Request) {
 
         const url = new URL(req.url);
 
+        // sort: "views" (default) | "date"
+        const sort = (url.searchParams.get("sort") ?? "views").toLowerCase();
+
         // How many clips per page
         const first = Math.min(Math.max(Number(url.searchParams.get("first") ?? "12"), 1), 20);
 
@@ -148,8 +151,13 @@ export async function GET(req: Request) {
                 createdAt: clip.created_at,
                 duration: clip.duration,
             }))
-            // ensure newest first
-            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+            .sort((a, b) => {
+                if (sort === "date") {
+                    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+                }
+                // default: most viewed
+                return b.viewCount - a.viewCount;
+            });
 
         const returnedCursor: string | null = data.pagination?.cursor ?? null;
 

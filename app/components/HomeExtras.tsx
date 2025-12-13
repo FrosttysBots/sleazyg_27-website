@@ -25,7 +25,13 @@ type Segment = {
 
 function formatLocal(dtIso: string) {
     const d = new Date(dtIso);
-    return d.toLocaleString(undefined, { weekday: "short", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+    return d.toLocaleString(undefined, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+    });
 }
 
 export default function HomeExtras() {
@@ -34,31 +40,53 @@ export default function HomeExtras() {
     const [activeClip, setActiveClip] = useState<Clip | null>(null);
 
     const parentHost = useMemo(() => {
-        // MUST be hostname only, e.g. "sleazyg-27-website.vercel.app"
-        return (process.env.NEXT_PUBLIC_TWITCH_PARENT ?? "localhost").replace(/^https?:\/\//, "").replace(/\/.*$/, "");
+        // MUST be hostname only, e.g. "sleazyg27.me" or "sleazyg-27-website.vercel.app"
+        return (process.env.NEXT_PUBLIC_TWITCH_PARENT ?? "localhost")
+            .replace(/^https?:\/\//, "")
+            .replace(/\/.*$/, "");
     }, []);
 
     useEffect(() => {
         (async () => {
             try {
-                const res = await fetch("/api/twitch/clips?first=3&mode=recent");
+                const res = await fetch("/api/twitch/clips?first=3&days=30&sort=date");
                 const data = await res.json();
-                setClips(data.clips ?? []);
-            } catch { }
+                setClips((data.clips ?? []).filter((c: Clip) => !!c.clipSlug));
+            } catch {
+                // ignore for now
+            }
         })();
 
         (async () => {
             try {
                 const res = await fetch("/api/twitch/schedule");
                 const data = await res.json();
-                const upcoming = (data.segments ?? []).filter((s: Segment) => !s.isCanceled);
+                const upcoming = (data.segments ?? []).filter(
+                    (s: Segment) => !s.isCanceled
+                );
                 setSegments(upcoming);
-            } catch { }
+            } catch {
+                // ignore for now
+            }
         })();
     }, []);
 
+    // Close modal on ESC
+    useEffect(() => {
+        if (!activeClip) return;
+
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") setActiveClip(null);
+        };
+
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, [activeClip]);
+
     const embedSrc = activeClip
-        ? `https://clips.twitch.tv/embed?clip=${encodeURIComponent(activeClip.clipSlug)}&parent=${encodeURIComponent(parentHost)}&autoplay=true&muted=false`
+        ? `https://clips.twitch.tv/embed?clip=${encodeURIComponent(
+            activeClip.clipSlug
+        )}&parent=${parentHost}&autoplay=true&muted=true`
         : "";
 
     return (
@@ -67,7 +95,9 @@ export default function HomeExtras() {
             <div className="home-block">
                 <div className="home-block-head">
                     <h2 className="home-block-title">Latest Clips</h2>
-                    <a className="home-block-link" href="/clips">View all →</a>
+                    <a className="home-block-link" href="/clips">
+                        View all →
+                    </a>
                 </div>
 
                 <div className="home-clips-row">
@@ -119,11 +149,23 @@ export default function HomeExtras() {
 
             {/* Clip modal */}
             {activeClip && (
-                <div className="clip-modal" role="dialog" aria-modal="true" onClick={() => setActiveClip(null)}>
+                <div
+                    className="clip-modal"
+                    role="dialog"
+                    aria-modal="true"
+                    onClick={() => setActiveClip(null)}
+                >
                     <div className="clip-modal-inner" onClick={(e) => e.stopPropagation()}>
                         <div className="clip-modal-top">
                             <div className="clip-modal-title">{activeClip.title}</div>
-                            <button className="clip-modal-close" onClick={() => setActiveClip(null)} type="button">✕</button>
+                            <button
+                                className="clip-modal-close"
+                                onClick={() => setActiveClip(null)}
+                                type="button"
+                                aria-label="Close"
+                            >
+                                ✕
+                            </button>
                         </div>
 
                         <div className="clip-modal-frame">

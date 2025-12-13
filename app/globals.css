@@ -510,26 +510,60 @@ body {
     transition: opacity 0.2s ease;
 }
 
+/* =========================
+   HOME EXTRAS (Landing)
+   ========================= */
+
 .home-extras {
     position: relative;
     z-index: 3;
     width: 100%;
     max-width: 1100px;
+    margin-top: -6px;
     margin: 0 auto;
-    padding: 8px 24px 32px;
+    padding: 10px 24px 34px;
     display: grid;
     gap: 18px;
 }
 
+/* Block shell w/ blue rim + glow */
 .home-block {
-    background: rgba(15, 23, 42, 0.84);
-    border: 1px solid rgba(148, 163, 184, 0.45);
-    border-radius: 18px;
+    position: relative;
+    border-radius: 20px;
     padding: 14px 16px;
-    box-shadow: 0 14px 32px rgba(15, 23, 42, 0.75);
+    background: rgba(15, 23, 42, 0.84);
+    border: 1px solid rgba(148, 163, 184, 0.38);
+    box-shadow: 0 14px 32px rgba(15, 23, 42, 0.72), 0 0 22px rgba(0, 42, 255, 0.10);
+    overflow: hidden;
 }
 
+    /* Subtle gradient */
+    .home-block::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        padding: 1px;
+        border-radius: inherit;
+        background: linear-gradient( 135deg, rgba(0, 42, 255, 0.55), rgba(34, 211, 238, 0.22), rgba(51, 92, 255, 0.40) );
+        mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        mask-composite: exclude;
+        opacity: 0.55;
+        pointer-events: none;
+    }
+
+    /* faint internal sheen */
+    .home-block::after {
+        content: "";
+        position: absolute;
+        inset: -40%;
+        background: radial-gradient(circle at 20% 30%, rgba(0, 42, 255, 0.16), transparent 55%);
+        opacity: 0.65;
+        pointer-events: none;
+    }
+
+/* Header row */
 .home-block-head {
+    position: relative;
     display: flex;
     align-items: baseline;
     justify-content: space-between;
@@ -538,15 +572,17 @@ body {
 }
 
 .home-block-title {
-    font-size: 1.1rem;
-    font-weight: 700;
+    font-size: 1.12rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
 }
 
 .home-block-link {
     font-size: 0.86rem;
     color: rgba(226, 232, 240, 0.92);
     text-decoration: none;
-    opacity: 0.9;
+    opacity: 0.92;
+    position: relative;
 }
 
     .home-block-link:hover {
@@ -558,8 +594,12 @@ body {
     opacity: 0.75;
 }
 
-/* Clips row */
+/* =========================
+   Latest clips row
+   ========================= */
+
 .home-clips-row {
+    position: relative;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 12px;
@@ -573,27 +613,28 @@ body {
 
 .home-clip-card {
     text-align: left;
-    border: none;
-    cursor: pointer;
-    background: rgba(2, 6, 23, 0.55);
-    border: 1px solid rgba(148, 163, 184, 0.35);
-    border-radius: 16px;
+    border: 1px solid rgba(148, 163, 184, 0.30);
+    border-radius: 18px;
     padding: 10px;
     color: #e5e7eb;
-    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    background: linear-gradient(135deg, rgba(0, 42, 255, 0.10), rgba(2, 6, 23, 0.55));
+    cursor: pointer;
+    transform: translateY(0) scale(1);
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
 }
 
     .home-clip-card:hover {
-        transform: translateY(-3px);
-        border-color: rgba(0, 42, 255, 0.65);
-        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35), 0 0 22px rgba(0, 42, 255, 0.14);
+        transform: translateY(-4px) scale(1.01);
+        border-color: rgba(0, 42, 255, 0.60);
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.35), 0 0 26px rgba(0, 42, 255, 0.16);
+        background: linear-gradient(135deg, rgba(0, 42, 255, 0.18), rgba(2, 6, 23, 0.55));
     }
 
 .home-clip-thumb {
     position: relative;
     width: 100%;
     padding-top: 56.25%;
-    border-radius: 12px;
+    border-radius: 14px;
     overflow: hidden;
     background: #020617;
     margin-bottom: 8px;
@@ -605,25 +646,35 @@ body {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        filter: saturate(1.05) contrast(1.03);
+        transform: scale(1);
+        transition: transform 0.25s ease;
     }
 
+.home-clip-card:hover .home-clip-thumb img {
+    transform: scale(1.03);
+}
+
+/* Play badge */
 .home-clip-play {
     position: absolute;
     right: 10px;
     bottom: 10px;
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
     border-radius: 999px;
     display: grid;
     place-items: center;
-    background: radial-gradient(circle at top left, #002AFF, #335CFF);
-    box-shadow: 0 0 16px rgba(0, 42, 255, 0.45);
+    background: radial-gradient(circle at top left, var(--sporty-accent-1), var(--sporty-accent-3));
+    box-shadow: 0 0 18px rgba(0, 42, 255, 0.42);
     font-size: 0.95rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
+/* Title */
 .home-clip-title {
     font-size: 0.9rem;
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1.25;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -631,8 +682,12 @@ body {
     overflow: hidden;
 }
 
-/* Schedule */
+/* =========================
+   Schedule
+   ========================= */
+
 .home-schedule {
+    position: relative;
     display: grid;
     gap: 10px;
 }
@@ -642,10 +697,17 @@ body {
     grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.8fr);
     gap: 12px;
     padding: 10px 12px;
-    border-radius: 14px;
-    background: rgba(2, 6, 23, 0.45);
-    border: 1px solid rgba(148, 163, 184, 0.30);
+    border-radius: 16px;
+    background: rgba(2, 6, 23, 0.40);
+    border: 1px solid rgba(148, 163, 184, 0.26);
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
+
+    .home-schedule-item:hover {
+        transform: translateY(-2px);
+        border-color: rgba(0, 42, 255, 0.42);
+        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.25), 0 0 18px rgba(0, 42, 255, 0.10);
+    }
 
 @media (max-width: 700px) {
     .home-schedule-item {
@@ -655,11 +717,11 @@ body {
 
 .home-schedule-time {
     font-size: 0.82rem;
-    opacity: 0.9;
+    opacity: 0.92;
 }
 
 .home-schedule-start {
-    font-weight: 700;
+    font-weight: 800;
 }
 
 .home-schedule-end {
@@ -668,7 +730,7 @@ body {
 
 .home-schedule-title {
     font-size: 0.95rem;
-    font-weight: 700;
+    font-weight: 800;
 }
 
 .home-schedule-cat {
@@ -681,49 +743,86 @@ body {
     opacity: 0.85;
 }
 
-/* Modal */
+/* =========================
+   Clip modal
+   ========================= */
+
 .clip-modal {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.65);
     z-index: 80;
     display: grid;
     place-items: center;
     padding: 18px;
+    background: rgba(0, 0, 0, 0.62);
+    backdrop-filter: blur(6px);
+    animation: modalFade 0.12s ease-out;
+}
+
+@keyframes modalFade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .clip-modal-inner {
     width: min(980px, 100%);
     background: rgba(15, 23, 42, 0.96);
-    border: 1px solid rgba(148, 163, 184, 0.40);
-    border-radius: 18px;
+    border: 1px solid rgba(148, 163, 184, 0.34);
+    border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 22px 60px rgba(0,0,0,0.55), 0 0 28px rgba(0, 42, 255, 0.18);
+    box-shadow: 0 26px 70px rgba(0, 0, 0, 0.58), 0 0 34px rgba(0, 42, 255, 0.20);
+    position: relative;
 }
 
+    /* top glow strip */
+    .clip-modal-inner::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: 120px;
+        background: radial-gradient(circle at 20% 20%, rgba(0, 42, 255, 0.22), transparent 60%);
+        pointer-events: none;
+        opacity: 0.9;
+    }
+
 .clip-modal-top {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
     padding: 12px 14px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .clip-modal-title {
     font-size: 0.95rem;
-    font-weight: 700;
+    font-weight: 800;
     color: #e5e7eb;
 }
 
 .clip-modal-close {
-    border: 1px solid rgba(148, 163, 184, 0.45);
+    border: 1px solid rgba(148, 163, 184, 0.38);
     background: rgba(2, 6, 23, 0.55);
     color: #e5e7eb;
     border-radius: 12px;
     padding: 6px 10px;
     cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
+
+    .clip-modal-close:hover {
+        transform: translateY(-1px);
+        border-color: rgba(0, 42, 255, 0.55);
+        box-shadow: 0 0 18px rgba(0, 42, 255, 0.14);
+    }
 
 .clip-modal-frame {
     position: relative;
@@ -752,6 +851,7 @@ body {
     .clip-modal-link:hover {
         text-decoration: underline;
     }
+
 
 
 
