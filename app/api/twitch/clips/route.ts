@@ -6,8 +6,6 @@ const TWITCH_CLIPS_URL = "https://api.twitch.tv/helix/clips";
 
 let cachedToken: { access_token: string; expires_at: number } | null = null;
 
-/* ---------------------- TYPES ---------------------- */
-
 type TwitchClip = {
     id: string;
     url: string;
@@ -19,38 +17,22 @@ type TwitchClip = {
     duration: number;
 };
 
-/* ---------------------- TOKEN FETCH ---------------------- */
-
 async function getAppAccessToken() {
-    if (cachedToken && cachedToken.expires_at > Date.now()) {
-        return cachedToken.access_token;
-    }
+    if (cachedToken && cachedToken.expires_at > Date.now()) return cachedToken.access_token;
 
     const clientId = process.env.TWITCH_CLIENT_ID;
     const clientSecret = process.env.TWITCH_CLIENT_SECRET;
-
-    if (!clientId || !clientSecret) {
-        throw new Error("Twitch client ID/secret not configured");
-    }
+    if (!clientId || !clientSecret) throw new Error("Twitch client ID/secret not configured");
 
     const params = new URLSearchParams();
     params.append("client_id", clientId);
     params.append("client_secret", clientSecret);
     params.append("grant_type", "client_credentials");
 
-    const res = await fetch(TWITCH_TOKEN_URL, {
-        method: "POST",
-        body: params,
-    });
+    const res = await fetch(TWITCH_TOKEN_URL, { method: "POST", body: params });
+    if (!res.ok) throw new Error("Failed to obtain Twitch OAuth token");
 
-    if (!res.ok) {
-        throw new Error("Failed to obtain Twitch OAuth token");
-    }
-
-    const data = (await res.json()) as {
-        access_token: string;
-        expires_in: number;
-    };
+    const data = (await res.json()) as { access_token: string; expires_in: number };
 
     cachedToken = {
         access_token: data.access_token,
@@ -59,8 +41,6 @@ async function getAppAccessToken() {
 
     return data.access_token;
 }
-
-/* ---------------------- GET USER ID ---------------------- */
 
 async function getBroadcasterId(token: string, login: string) {
     const res = await fetch(`${TWITCH_USERS_URL}?login=${login}`, {
@@ -71,83 +51,90 @@ async function getBroadcasterId(token: string, login: string) {
         cache: "no-store",
     });
 
-    if (!res.ok) {
-        throw new Error("Failed to fetch Twitch user profile");
-    }
+    if (!res.ok) throw new Error("Failed to fetch Twitch user profile");
 
     const data = await res.json();
     const user = data.data?.[0];
-
-    if (!user) {
-        throw new Error("Twitch user not found");
-    }
+    if (!user) throw new Error("Twitch user not found");
 
     return user.id as string;
 }
 
-/* ---------------------- ROUTE HANDLER ---------------------- */
+function extractClipSlug(embedUrl: string) {
+    // Example: https://clips.twitch.tv/embed?clip=SomeSlug&parent=...
+    try {
+        const u = new URL(embedUrl);
+        return u.searchParams.get("clip") ?? "";
+    } catch {
+        return "";
+    }
+}
 
 export async function GET(req: Request) {
     try {
         const userLogin = process.env.TWITCH_USER_LOGIN;
-
         if (!userLogin) {
-            return NextResponse.json(
-                { error: "Missing TWITCH_USER_LOGIN in env" },
-                { status: 500 }
-            );
+            return NextResponse.json({ error: "Missing TWITCH_USER_LOGIN in env" }, { status: 500 });
         }
 
-        // Read optional cursor from query string
         const url = new URL(req.url);
-        const cursor = url.searchParams.get("cursor") ?? undefined;
+        const first = Math.min(Math.max(Number(url.searchParams.get("first") ?? "12"), 1), 20);
+
+        // NEW: how far back to look (default 30 days)
+        const days = Math.min(
+            Math.max(Number(url.searchParams.get("days") ?? "360"), 1),
+            365
+        );
+
+        const endedAt = new Date();
+        const startedAt = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+        const startedIso = startedAt.toISOString();
+        const endedIso = endedAt.toISOString();
 
         const token = await getAppAccessToken();
         const broadcasterId = await getBroadcasterId(token, userLogin);
 
-        // Build clips request with optional pagination
-        const params = new URLSearchParams();
-        params.set("broadcaster_id", broadcasterId);
-        params.set("first", "12"); // page size
+        const res = await fetch(
+            `${TWITCH_CLIPS_URL}?broadcaster_id=${broadcasterId}` +
+            `&first=${first}` +
+            `&started_at=${encodeURIComponent(startedIso)}` +
+            `&ended_at=${encodeURIComponent(endedIso)}`,
+            {
+                headers: {
+                    "Client-ID": process.env.TWITCH_CLIENT_ID || "",
+                    Authorization: `Bearer ${token}`,
+                },
+                cache: "no-store",
+            }
+        );
 
-        if (cursor) {
-            params.set("after", cursor);
-        }
-
-        const res = await fetch(`${TWITCH_CLIPS_URL}?${params.toString()}`, {
-            headers: {
-                "Client-ID": process.env.TWITCH_CLIENT_ID || "",
-                Authorization: `Bearer ${token}`,
-            },
-            cache: "no-store",
-        });
-
-        if (!res.ok) {
-            throw new Error("Failed to fetch Twitch clips");
-        }
+        if (!res.ok) throw new Error("Failed to fetch Twitch clips");
 
         const data = await res.json();
 
-        const clips = (data.data as TwitchClip[]).map((clip) => ({
-            id: clip.id,
-            url: clip.url,
-            // We do not need embedUrl on the client any more.
-            // We build the embed URL in the frontend from clip.id.
-            title: clip.title,
-            thumbnailUrl: clip.thumbnail_url,
-            viewCount: clip.view_count,
-            createdAt: clip.created_at,
-            duration: clip.duration,
-        }));
+        const clips = (data.data as TwitchClip[])
+            .map((clip) => ({
+                id: clip.id,
+                url: clip.url,
+                embedUrl: clip.embed_url,
+                clipSlug: extractClipSlug(clip.embed_url),
+                title: clip.title,
+                thumbnailUrl: clip.thumbnail_url,
+                viewCount: clip.view_count,
+                createdAt: clip.created_at,
+                duration: clip.duration,
+            }))
+            // NEW: newest clips first
+            .sort(
+                (a, b) =>
+                    new Date(b.createdAt).getTime() -
+                    new Date(a.createdAt).getTime()
+            );
 
-        const nextCursor = data.pagination?.cursor ?? null;
-
-        return NextResponse.json({ clips, cursor: nextCursor });
+        return NextResponse.json({ clips });
     } catch (err) {
         console.error("Error in Twitch Clips API:", err);
-        return NextResponse.json(
-            { error: "Failed to fetch Twitch clips", clips: [], cursor: null },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: "Failed to fetch Twitch clips" }, { status: 500 });
     }
 }

@@ -49,9 +49,7 @@ export default function ClipsPage() {
         if (!nextCursor) return;
         setLoadingMore(true);
         try {
-            const res = await fetch(
-                `/api/twitch/clips?cursor=${encodeURIComponent(nextCursor)}`
-            );
+            const res = await fetch("/api/twitch/clips?first=12&days=120");
             if (!res.ok) throw new Error("Failed to load more clips");
             const data = (await res.json()) as ClipsResponse;
 

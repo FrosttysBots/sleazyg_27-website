@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "./components/Navbar"; // adjust path if yours is different
+import CursorGlow from "./components/CursorGlow";
 
 export const metadata: Metadata = {
     title: "SleazyG_27 Hub",
@@ -89,6 +90,8 @@ export default function RootLayout({
         <html lang="en">
             <body>
                 <Navbar />
+                <div id="cursor-glow" />
+                <CursorGlow />
                 {children}
                 <Footer />
             </body>

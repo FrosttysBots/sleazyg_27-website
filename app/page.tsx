@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import "./landing.css";
+import HomeExtras from "./components/HomeExtras";
 
 type LastVod = {
     title: string;
@@ -269,6 +270,7 @@ export default function Home() {
                     </a>
                 </div>
             </section>
+            <HomeExtras />
         </main>
     );
 }
