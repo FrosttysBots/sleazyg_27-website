@@ -17,6 +17,16 @@ type TwitchClip = {
     duration: number;
 };
 
+async function assertOk(res: Response, label: string) {
+    if (res.ok) return;
+    const text = await res.text().catch(() => "");
+    throw new Error(
+        `${label} failed: ${res.status} ${res.statusText} :: ${text.slice(0, 800)}`
+    );
+}
+
+/* ---------------------- TOKEN FETCH ---------------------- */
+
 async function getAppAccessToken() {
     if (cachedToken && cachedToken.expires_at > Date.now()) return cachedToken.access_token;
 
@@ -30,7 +40,7 @@ async function getAppAccessToken() {
     params.append("grant_type", "client_credentials");
 
     const res = await fetch(TWITCH_TOKEN_URL, { method: "POST", body: params });
-    if (!res.ok) throw new Error("Failed to obtain Twitch OAuth token");
+    await assertOk(res, "TWITCH_TOKEN");
 
     const data = (await res.json()) as { access_token: string; expires_in: number };
 
@@ -42,8 +52,10 @@ async function getAppAccessToken() {
     return data.access_token;
 }
 
+/* ---------------------- GET USER ID ---------------------- */
+
 async function getBroadcasterId(token: string, login: string) {
-    const res = await fetch(`${TWITCH_USERS_URL}?login=${login}`, {
+    const res = await fetch(`${TWITCH_USERS_URL}?login=${encodeURIComponent(login)}`, {
         headers: {
             "Client-ID": process.env.TWITCH_CLIENT_ID || "",
             Authorization: `Bearer ${token}`,
@@ -51,7 +63,7 @@ async function getBroadcasterId(token: string, login: string) {
         cache: "no-store",
     });
 
-    if (!res.ok) throw new Error("Failed to fetch Twitch user profile");
+    await assertOk(res, "TWITCH_USERS");
 
     const data = await res.json();
     const user = data.data?.[0];
@@ -59,6 +71,8 @@ async function getBroadcasterId(token: string, login: string) {
 
     return user.id as string;
 }
+
+/* ---------------------- HELPERS ---------------------- */
 
 function extractClipSlug(embedUrl: string) {
     // Example: https://clips.twitch.tv/embed?clip=SomeSlug&parent=...
@@ -70,22 +84,30 @@ function extractClipSlug(embedUrl: string) {
     }
 }
 
+/* ---------------------- ROUTE HANDLER ---------------------- */
+
 export async function GET(req: Request) {
     try {
         const userLogin = process.env.TWITCH_USER_LOGIN;
         if (!userLogin) {
-            return NextResponse.json({ error: "Missing TWITCH_USER_LOGIN in env" }, { status: 500 });
+            return NextResponse.json(
+                { error: "Missing TWITCH_USER_LOGIN in env", clips: [], cursor: null, hasMore: false },
+                { status: 500 }
+            );
         }
 
         const url = new URL(req.url);
+
+        // How many clips per page
         const first = Math.min(Math.max(Number(url.searchParams.get("first") ?? "12"), 1), 20);
 
-        // NEW: how far back to look (default 30 days)
-        const days = Math.min(
-            Math.max(Number(url.searchParams.get("days") ?? "360"), 1),
-            365
-        );
+        // How far back to look (days)
+        const days = Math.min(Math.max(Number(url.searchParams.get("days") ?? "3650"), 1), 3650);
 
+        // Cursor for pagination (incoming)
+        const after = url.searchParams.get("after") ?? null;
+
+        // Time window
         const endedAt = new Date();
         const startedAt = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
@@ -95,21 +117,22 @@ export async function GET(req: Request) {
         const token = await getAppAccessToken();
         const broadcasterId = await getBroadcasterId(token, userLogin);
 
-        const res = await fetch(
+        const clipsUrl =
             `${TWITCH_CLIPS_URL}?broadcaster_id=${broadcasterId}` +
             `&first=${first}` +
             `&started_at=${encodeURIComponent(startedIso)}` +
-            `&ended_at=${encodeURIComponent(endedIso)}`,
-            {
-                headers: {
-                    "Client-ID": process.env.TWITCH_CLIENT_ID || "",
-                    Authorization: `Bearer ${token}`,
-                },
-                cache: "no-store",
-            }
-        );
+            `&ended_at=${encodeURIComponent(endedIso)}` +
+            (after ? `&after=${encodeURIComponent(after)}` : "");
 
-        if (!res.ok) throw new Error("Failed to fetch Twitch clips");
+        const res = await fetch(clipsUrl, {
+            headers: {
+                "Client-ID": process.env.TWITCH_CLIENT_ID || "",
+                Authorization: `Bearer ${token}`,
+            },
+            cache: "no-store",
+        });
+
+        await assertOk(res, "TWITCH_CLIPS");
 
         const data = await res.json();
 
@@ -125,16 +148,46 @@ export async function GET(req: Request) {
                 createdAt: clip.created_at,
                 duration: clip.duration,
             }))
-            // NEW: newest clips first
-            .sort(
-                (a, b) =>
-                    new Date(b.createdAt).getTime() -
-                    new Date(a.createdAt).getTime()
-            );
+            // ensure newest first
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-        return NextResponse.json({ clips });
+        const returnedCursor: string | null = data.pagination?.cursor ?? null;
+
+        // --------------- END/LOOP PROTECTION ---------------
+        // If Twitch returns the same cursor you sent, you're looping.
+        const cursorDidNotAdvance =
+            after !== null && returnedCursor !== null && returnedCursor === after;
+
+        // If Twitch returned fewer than requested, that's usually the end of available data for that window.
+        const likelyEndOfWindow = clips.length < first;
+
+        // We only allow "hasMore" when it looks like we can actually paginate.
+        const hasMore =
+            !!returnedCursor &&
+            !cursorDidNotAdvance &&
+            !likelyEndOfWindow &&
+            clips.length > 0;
+
+        return NextResponse.json({
+            clips,
+            cursor: hasMore ? returnedCursor : null,
+            hasMore,
+        });
     } catch (err) {
         console.error("Error in Twitch Clips API:", err);
-        return NextResponse.json({ error: "Failed to fetch Twitch clips" }, { status: 500 });
+
+        // Helpful error payload for debugging (still safe)
+        const message = err instanceof Error ? err.message : "Unknown error";
+
+        return NextResponse.json(
+            {
+                error: "Failed to fetch Twitch clips",
+                details: message,
+                clips: [],
+                cursor: null,
+                hasMore: false,
+            },
+            { status: 500 }
+        );
     }
 }

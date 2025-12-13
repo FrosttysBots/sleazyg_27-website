@@ -41,7 +41,7 @@ export default function HomeExtras() {
     useEffect(() => {
         (async () => {
             try {
-                const res = await fetch("/api/twitch/clips?first=3&days=360");
+                const res = await fetch("/api/twitch/clips?first=3&mode=recent");
                 const data = await res.json();
                 setClips(data.clips ?? []);
             } catch { }
