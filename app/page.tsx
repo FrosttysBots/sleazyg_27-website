@@ -55,7 +55,8 @@ export default function Home() {
     const isLive = !!liveStatus?.live;
     const hasVod = !isLive && !!liveStatus?.lastVod;
     const vod = liveStatus?.lastVod;
-    const twitchParent = "sleazyg27.me"; // change to your real domain when deployed
+    const twitchParent =
+        typeof window !== "undefined" ? window.location.hostname : "localhost";
 
     return (
         <main className="landing-container">
@@ -138,7 +139,7 @@ export default function Home() {
             </div>
 
             {/* Live or last stream section */}
-            {!liveLoading && (isLive || hasVod) && (
+            {!liveLoading && (
                 <section className="live-section">
                     <div className="live-card">
                         <div className="live-header">
@@ -173,29 +174,18 @@ export default function Home() {
 
                         <div className="live-body">
                             <div className="live-player-wrapper">
-                                {isLive ? (
-                                    <iframe
-                                        className="live-player"
-                                        src={
-                                            "https://player.twitch.tv/?channel=SleazyG_27&parent=" +
-                                            twitchParent +
-                                            "&muted=true"
-                                        }
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture"
-                                        allowFullScreen
-                                        title="SleazyG_27 live stream"
-                                    />
-                                ) : (
-                                    vod && (
-                                        <img
-                                            src={vod.thumbnailUrl}
-                                            alt={vod.title}
-                                            className="live-vod-thumb"
-                                        />
-                                    )
-                                )}
+                                <iframe
+                                    className="live-player"
+                                    src={
+                                        "https://player.twitch.tv/?channel=SleazyG_27&parent=" +
+                                        encodeURIComponent(twitchParent) +
+                                        "&muted=true"
+                                    }
+                                    allow="autoplay; encrypted-media; picture-in-picture"
+                                    allowFullScreen
+                                    title="SleazyG_27 Twitch channel"
+                                />
                             </div>
-
                             <div className="live-side-meta">
                                 {isLive && typeof liveStatus?.viewerCount === "number" && (
                                     <div className="live-viewers">
