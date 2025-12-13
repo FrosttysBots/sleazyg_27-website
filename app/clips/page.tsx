@@ -81,7 +81,7 @@ export default function ClipsPage() {
     }
 
     // IMPORTANT: Twitch expects just the domain here (no https, no trailing slash)
-    const TWITCH_PARENT = "sleazyg27.vercel.app";
+    const TWITCH_PARENT = "sleazyg27.me";
 
     function getEmbedSrc(clipId: string) {
         return `https://clips.twitch.tv/embed?clip=${encodeURIComponent(
