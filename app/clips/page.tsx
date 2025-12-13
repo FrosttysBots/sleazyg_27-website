@@ -36,7 +36,7 @@ export default function ClipsPage() {
     useEffect(() => {
         async function loadInitial() {
             try {
-                const res = await fetch("/api/twitch/clips?first=12&days=3650&sort=views");
+                const res = await fetch("/api/twitch/clips?first=12&days=3650");
                 if (!res.ok) throw new Error("Failed to load clips");
 
                 const data = (await res.json()) as ClipsResponse;
@@ -61,7 +61,7 @@ export default function ClipsPage() {
 
         try {
             const res = await fetch(
-                `/api/twitch/clips?first=12&days=3650&sort=views&after=${encodeURIComponent(
+                `/api/twitch/clips?first=12&days=3650&after=${encodeURIComponent(
                     nextCursor
                 )}`
             );

@@ -872,6 +872,14 @@ body {
 html,
 body {
     cursor: url("/cursor-default.png") 10 10, auto !important;
+    height: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+main {
+    height: auto !important;
+    overflow: visible !important;
 }
 
 /* Hover cursor for clickable elements */

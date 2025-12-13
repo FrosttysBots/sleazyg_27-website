@@ -26,7 +26,6 @@ async function assertOk(res: Response, label: string) {
 }
 
 /* ---------------------- TOKEN FETCH ---------------------- */
-
 async function getAppAccessToken() {
     if (cachedToken && cachedToken.expires_at > Date.now()) return cachedToken.access_token;
 
@@ -53,7 +52,6 @@ async function getAppAccessToken() {
 }
 
 /* ---------------------- GET USER ID ---------------------- */
-
 async function getBroadcasterId(token: string, login: string) {
     const res = await fetch(`${TWITCH_USERS_URL}?login=${encodeURIComponent(login)}`, {
         headers: {
@@ -72,10 +70,8 @@ async function getBroadcasterId(token: string, login: string) {
     return user.id as string;
 }
 
-/* ---------------------- HELPERS ---------------------- */
-
-function extractClipSlug(embedUrl: string) {
-    // Example: https://clips.twitch.tv/embed?clip=SomeSlug&parent=...
+/* ---------------------- SLUG HELPERS ---------------------- */
+function extractClipSlugFromEmbed(embedUrl: string) {
     try {
         const u = new URL(embedUrl);
         return u.searchParams.get("clip") ?? "";
@@ -84,8 +80,23 @@ function extractClipSlug(embedUrl: string) {
     }
 }
 
-/* ---------------------- ROUTE HANDLER ---------------------- */
+function extractClipSlugFromUrl(url: string) {
+    // Example: https://www.twitch.tv/sleazyg_27/clip/SlugHere
+    const marker = "/clip/";
+    const idx = url.indexOf(marker);
+    if (idx === -1) return "";
+    return url.substring(idx + marker.length).split(/[?#/]/)[0] ?? "";
+}
 
+function getClipSlug(clip: { embed_url: string; url: string; id: string }) {
+    return (
+        extractClipSlugFromEmbed(clip.embed_url) ||
+        extractClipSlugFromUrl(clip.url) ||
+        clip.id
+    );
+}
+
+/* ---------------------- ROUTE HANDLER ---------------------- */
 export async function GET(req: Request) {
     try {
         const userLogin = process.env.TWITCH_USER_LOGIN;
@@ -114,17 +125,14 @@ export async function GET(req: Request) {
         const endedAt = new Date();
         const startedAt = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
-        const startedIso = startedAt.toISOString();
-        const endedIso = endedAt.toISOString();
-
         const token = await getAppAccessToken();
         const broadcasterId = await getBroadcasterId(token, userLogin);
 
         const clipsUrl =
-            `${TWITCH_CLIPS_URL}?broadcaster_id=${broadcasterId}` +
+            `${TWITCH_CLIPS_URL}?broadcaster_id=${encodeURIComponent(broadcasterId)}` +
             `&first=${first}` +
-            `&started_at=${encodeURIComponent(startedIso)}` +
-            `&ended_at=${encodeURIComponent(endedIso)}` +
+            `&started_at=${encodeURIComponent(startedAt.toISOString())}` +
+            `&ended_at=${encodeURIComponent(endedAt.toISOString())}` +
             (after ? `&after=${encodeURIComponent(after)}` : "");
 
         const res = await fetch(clipsUrl, {
@@ -139,37 +147,36 @@ export async function GET(req: Request) {
 
         const data = await res.json();
 
-        const clips = (data.data as TwitchClip[])
-            .map((clip) => ({
-                id: clip.id,
-                url: clip.url,
-                embedUrl: clip.embed_url,
-                clipSlug: extractClipSlug(clip.embed_url),
-                title: clip.title,
-                thumbnailUrl: clip.thumbnail_url,
-                viewCount: clip.view_count,
-                createdAt: clip.created_at,
-                duration: clip.duration,
-            }))
-            .sort((a, b) => {
-                if (sort === "date") {
-                    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-                }
-                // default: most viewed
-                return b.viewCount - a.viewCount;
-            });
+        let clips = (data.data as TwitchClip[]).map((clip) => ({
+            id: clip.id,
+            url: clip.url,
+            embedUrl: clip.embed_url,
+            clipSlug: getClipSlug(clip),
+            title: clip.title,
+            thumbnailUrl: clip.thumbnail_url,
+            viewCount: clip.view_count,
+            createdAt: clip.created_at,
+            duration: clip.duration,
+        }));
+
+        // IMPORTANT:
+        // - For "views" we DO NOT sort (Twitch already returns most-viewed order)
+        //   and sorting would mess with pagination semantics.
+        // - For "date" (landing page), we sort newest-first.
+        if (sort === "date") {
+            clips = clips.sort(
+                (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            );
+        }
 
         const returnedCursor: string | null = data.pagination?.cursor ?? null;
 
-        // --------------- END/LOOP PROTECTION ---------------
-        // If Twitch returns the same cursor you sent, you're looping.
+        // End/loop protection
         const cursorDidNotAdvance =
             after !== null && returnedCursor !== null && returnedCursor === after;
 
-        // If Twitch returned fewer than requested, that's usually the end of available data for that window.
         const likelyEndOfWindow = clips.length < first;
 
-        // We only allow "hasMore" when it looks like we can actually paginate.
         const hasMore =
             !!returnedCursor &&
             !cursorDidNotAdvance &&
@@ -183,8 +190,6 @@ export async function GET(req: Request) {
         });
     } catch (err) {
         console.error("Error in Twitch Clips API:", err);
-
-        // Helpful error payload for debugging (still safe)
         const message = err instanceof Error ? err.message : "Unknown error";
 
         return NextResponse.json(

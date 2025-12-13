@@ -49,9 +49,9 @@ export default function HomeExtras() {
     useEffect(() => {
         (async () => {
             try {
-                const res = await fetch("/api/twitch/clips?first=3&days=30&sort=date");
+                const res = await fetch("/api/twitch/clips?first=3&days=180&sort=date");
                 const data = await res.json();
-                setClips((data.clips ?? []).filter((c: Clip) => !!c.clipSlug));
+                setClips(data.clips ?? []);
             } catch {
                 // ignore for now
             }
