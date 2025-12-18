@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "./components/Navbar"; // adjust path if yours is different
 import CursorGlow from "./components/CursorGlow";
+import { Analytics } from "@vercel/analytics/next"
 
 export const metadata: Metadata = {
     title: "SleazyG_27 Hub",
@@ -94,6 +95,7 @@ export default function RootLayout({
                 <CursorGlow />
                 {children}
                 <Footer />
+                <Analytics />
             </body>
         </html>
     );
