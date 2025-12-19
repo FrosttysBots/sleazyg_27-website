@@ -1,6 +1,7 @@
-﻿import "./social.css";
+﻿import path from "path";
+import "./social.css";
 
-type Platform = "twitch" | "youtube" | "instagram" | "tiktok" | "x" | "snapchat";
+type Platform = "twitch" | "kick" | "youtube" | "instagram" | "tiktok" | "x" | "snapchat";
 
 type SocialLink = {
     name: string;
@@ -21,6 +22,15 @@ const primarySocials: SocialLink[] = [
         accent: "purple",
         tag: "Live streams",
         platform: "twitch",
+    },
+    {
+        name: "Kick",
+        handle: "kick.com/sleazyg27",
+        description: "Alt stream home - same enrgy, same Sleazy.",
+        url: "https://kick.com/sleazyg27",
+        accent: "green",
+        tag: "Live streams",
+        platform: "kick",
     },
     {
         name: "YouTube",
@@ -88,6 +98,16 @@ function SocialIcon({ platform }: { platform: Platform }) {
                         fill="currentColor"
                     />
                     <path d="M14 7h2v5h-2zM10.5 7h2v5h-2z" fill="#000" />
+                </svg>
+            );
+
+        case "kick":
+            return (
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                        d="M6 5h4v6l5-6h5l-6.5 7.3L20 19h-5.2l-4-4.6-0.8.9V19H6V5z"
+                        fill="currentColor"
+                    />
                 </svg>
             );
         case "youtube":
