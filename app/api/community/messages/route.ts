@@ -1,66 +1,79 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 
-type ReactionKey = "love" | "fire" | "brain" | "rip";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-function emptyReactions(): Record<ReactionKey, number> {
+type ReactionKey = "love" | "fire" | "brain" | "rip";
+const REACTION_KEYS: ReactionKey[] = ["love", "fire", "brain", "rip"];
+
+function emptyCounts(): Record<ReactionKey, number> {
     return { love: 0, fire: 0, brain: 0, rip: 0 };
 }
+
+type MessageRow = {
+    id: string;
+    author: string | null;
+    body: string | null;
+    created_at: string; // timestamptz as string
+};
+
+type ReactionRow = {
+    post_id: string;
+    post_type: string;
+    reaction_key: ReactionKey | string;
+};
 
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const limit = Math.min(Number(searchParams.get("limit") ?? 80), 200);
-    const sort = searchParams.get("sort") === "top" ? "top" : "new";
 
-    // NOTE: "top" sorting needs reaction counts; for now we just sort by created_at.
-    const { data, error } = await supabaseAdmin
+    const { data: messages, error: msgErr } = await supabaseAdmin
         .from("messages")
         .select("id, author, body, created_at")
         .order("created_at", { ascending: false })
         .limit(limit);
 
-    if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    if (msgErr) {
+        return NextResponse.json({ error: msgErr.message }, { status: 500 });
     }
 
-    const messages = (data ?? []).map((m) => ({
-        id: m.id,
-        author: m.author ?? "Anonymous",
-        body: m.body,
-        createdAt: m.created_at,          // normalize
-        reactions: emptyReactions(),      // keep UI stable
+    const safeMessages = (messages ?? []) as MessageRow[];
+    const ids = safeMessages.map((m) => m.id);
+
+    if (ids.length === 0) return NextResponse.json({ messages: [] });
+
+    // Pull all reactions for these messages, then count in JS
+    const { data: reactions, error: rxErr } = await supabaseAdmin
+        .from("reactions")
+        .select("post_id, post_type, reaction_key")
+        .eq("post_type", "messages")
+        .in("post_id", ids);
+
+    // If reaction query fails, still return messages with empty counts
+    if (rxErr) {
+        const shaped = safeMessages.map((m) => ({ ...m, reactions: emptyCounts() }));
+        return NextResponse.json({ messages: shaped });
+    }
+
+    const map = new Map<string, Record<ReactionKey, number>>();
+    for (const id of ids) map.set(id, emptyCounts());
+
+    for (const r of (reactions ?? []) as ReactionRow[]) {
+        const postId = r.post_id;
+        const key = r.reaction_key;
+
+        if (!map.has(postId)) map.set(postId, emptyCounts());
+
+        if (REACTION_KEYS.includes(key as ReactionKey)) {
+            map.get(postId)![key as ReactionKey] += 1;
+        }
+    }
+
+    const shaped = safeMessages.map((m) => ({
+        ...m,
+        reactions: map.get(m.id) ?? emptyCounts(),
     }));
 
-    return NextResponse.json({ messages });
-}
-
-export async function POST(req: Request) {
-    try {
-        const body = (await req.json()) as { author?: string; body?: string };
-        const author = (body.author ?? "").trim() || "Anonymous";
-        const text = (body.body ?? "").trim();
-
-        if (!text) return NextResponse.json({ error: "Message is required" }, { status: 400 });
-
-        const { data, error } = await supabaseAdmin
-            .from("messages")
-            .insert({ author, body: text })
-            .select("id, author, body, created_at")
-            .single();
-
-        if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-        if (!data) return NextResponse.json({ error: "Insert failed" }, { status: 500 });
-
-        const message = {
-            id: data.id,
-            author: data.author ?? "Anonymous",
-            body: data.body,
-            createdAt: data.created_at,      // normalize
-            reactions: emptyReactions(),     // keep UI stable
-        };
-
-        return NextResponse.json({ message }, { status: 201 });
-    } catch {
-        return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-    }
+    return NextResponse.json({ messages: shaped });
 }
