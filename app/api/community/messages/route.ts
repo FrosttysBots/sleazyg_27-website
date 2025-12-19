@@ -15,7 +15,7 @@ type MessageRow = {
     id: string;
     author: string | null;
     body: string | null;
-    created_at: string; // timestamptz as string
+    created_at: string;
 };
 
 type ReactionRow = {
@@ -34,26 +34,22 @@ export async function GET(req: Request) {
         .order("created_at", { ascending: false })
         .limit(limit);
 
-    if (msgErr) {
-        return NextResponse.json({ error: msgErr.message }, { status: 500 });
-    }
+    if (msgErr) return NextResponse.json({ error: msgErr.message }, { status: 500 });
 
     const safeMessages = (messages ?? []) as MessageRow[];
     const ids = safeMessages.map((m) => m.id);
-
     if (ids.length === 0) return NextResponse.json({ messages: [] });
 
-    // Pull all reactions for these messages, then count in JS
     const { data: reactions, error: rxErr } = await supabaseAdmin
         .from("reactions")
         .select("post_id, post_type, reaction_key")
         .eq("post_type", "messages")
         .in("post_id", ids);
 
-    // If reaction query fails, still return messages with empty counts
     if (rxErr) {
-        const shaped = safeMessages.map((m) => ({ ...m, reactions: emptyCounts() }));
-        return NextResponse.json({ messages: shaped });
+        return NextResponse.json({
+            messages: safeMessages.map((m) => ({ ...m, reactions: emptyCounts() })),
+        });
     }
 
     const map = new Map<string, Record<ReactionKey, number>>();
@@ -62,18 +58,37 @@ export async function GET(req: Request) {
     for (const r of (reactions ?? []) as ReactionRow[]) {
         const postId = r.post_id;
         const key = r.reaction_key;
-
         if (!map.has(postId)) map.set(postId, emptyCounts());
-
-        if (REACTION_KEYS.includes(key as ReactionKey)) {
-            map.get(postId)![key as ReactionKey] += 1;
-        }
+        if (REACTION_KEYS.includes(key as ReactionKey)) map.get(postId)![key as ReactionKey] += 1;
     }
 
-    const shaped = safeMessages.map((m) => ({
-        ...m,
-        reactions: map.get(m.id) ?? emptyCounts(),
-    }));
+    return NextResponse.json({
+        messages: safeMessages.map((m) => ({ ...m, reactions: map.get(m.id) ?? emptyCounts() })),
+    });
+}
 
-    return NextResponse.json({ messages: shaped });
+export async function POST(req: Request) {
+    try {
+        const body = (await req.json()) as { author?: string; body?: string };
+
+        const author = (body.author ?? "").trim() || "Anonymous";
+        const text = (body.body ?? "").trim();
+
+        if (!text) {
+            return NextResponse.json({ error: "Message is required" }, { status: 400 });
+        }
+
+        const { data, error } = await supabaseAdmin
+            .from("messages")
+            .insert({ author, body: text })
+            .select("id, author, body, created_at")
+            .single();
+
+        if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+        // return with empty reaction counts so UI doesn't break
+        return NextResponse.json({ message: { ...data, reactions: emptyCounts() } }, { status: 201 });
+    } catch {
+        return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    }
 }
