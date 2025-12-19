@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./community.css";
+import Image from "next/image";
 
 type BoardTab = "messages" | "strategies";
 type SortMode = "new" | "top";
@@ -12,11 +13,11 @@ type Weapon = "Vandal" | "Phantom" | "Operator" | "Any";
 type Action = "Push" | "Hold" | "Fake" | "Lurk" | "Utility";
 type DurationRounds = 1 | 2 | 3 | 4 | 5;
 
-const REACTIONS: { key: ReactionKey; label: string; emoji: string }[] = [
-    { key: "love", label: "Love", emoji: "💙" },
-    { key: "fire", label: "Use this", emoji: "🔥" },
-    { key: "brain", label: "Big brain", emoji: "🤯" },
-    { key: "rip", label: "RIP", emoji: "😭" },
+const REACTIONS: { key: ReactionKey; label: string; iconSrc: string; iconAlt?: string }[] = [
+    { key: "love", label: "Love", iconSrc: "/reactions/love.png", iconAlt: "Love" },
+    { key: "fire", label: "Rage", iconSrc: "/reactions/fire.png", iconAlt: "Fire" },
+    { key: "brain", label: "Cool", iconSrc: "/reactions/brain.png", iconAlt: "Brain" },
+    { key: "rip", label: "RIP", iconSrc: "/reactions/rip.png", iconAlt: "RIP" },
 ];
 
 type BasePost = {
@@ -583,7 +584,13 @@ export default function CommunityPage() {
                                                 aria-label={`React ${r.label}`}
                                                 title={r.label}
                                             >
-                                                <span className="react-emoji">{r.emoji}</span>
+                                                <Image
+                                                    src={r.iconSrc}
+                                                    alt={r.iconAlt ?? r.label}
+                                                    width={18}
+                                                    height={18}
+                                                    className="react-icon"
+                                                    />
                                                 <span className={"react-count" + (userReactions[post.id] === r.key ? " react-count-pop" : "")}>
                                                     {post.reactions?.[r.key] ?? 0}
                                                 </span>
@@ -605,7 +612,7 @@ export default function CommunityPage() {
                                                         aria-label={r.label}
                                                         title={r.label}
                                                     >
-                                                        <span className="reaction-picker-emoji">{r.emoji}</span>
+                                                        <span className="reaction-picker-emoji">{r.iconSrc}</span>
                                                         <span className="reaction-picker-label">{r.label}</span>
                                                     </button>
                                                 ))}

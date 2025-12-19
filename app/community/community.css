@@ -452,6 +452,27 @@
     font-size: 1rem;
 }
 
+.react-icon {
+    display: block;
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 6px rgba(0, 42, 255, 0.25));
+    opacity: 0.95;
+}
+
+.react-btn-active .react-icon {
+    filter: drop-shadow(0 0 10px rgba(91, 127, 255, 0.75));
+    transform: translateY(-0.5px) scale(1.05);
+}
+
+@media (max-width: 560px) {
+    .react-icon {
+        width: 16px;
+        height: 16px;
+    }
+}
+
 .react-count {
     font-size: 0.82rem;
     opacity: 0.9;
