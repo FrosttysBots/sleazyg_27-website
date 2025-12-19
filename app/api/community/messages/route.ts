@@ -24,6 +24,11 @@ type ReactionRow = {
     reaction_key: ReactionKey | string;
 };
 
+function shapeMessage(m: MessageRow, reactions: Record<ReactionKey, number>) {
+    const { created_at, ...rest } = m;
+    return { ...rest, createdAt: created_at, reactions };
+}
+
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const limit = Math.min(Number(searchParams.get("limit") ?? 80), 200);
@@ -46,24 +51,20 @@ export async function GET(req: Request) {
         .eq("post_type", "messages")
         .in("post_id", ids);
 
-    if (rxErr) {
-        return NextResponse.json({
-            messages: safeMessages.map((m) => ({ ...m, reactions: emptyCounts() })),
-        });
-    }
-
     const map = new Map<string, Record<ReactionKey, number>>();
     for (const id of ids) map.set(id, emptyCounts());
 
-    for (const r of (reactions ?? []) as ReactionRow[]) {
-        const postId = r.post_id;
-        const key = r.reaction_key;
-        if (!map.has(postId)) map.set(postId, emptyCounts());
-        if (REACTION_KEYS.includes(key as ReactionKey)) map.get(postId)![key as ReactionKey] += 1;
+    if (!rxErr) {
+        for (const r of (reactions ?? []) as ReactionRow[]) {
+            const postId = r.post_id;
+            const key = r.reaction_key;
+            if (!map.has(postId)) map.set(postId, emptyCounts());
+            if (REACTION_KEYS.includes(key as ReactionKey)) map.get(postId)![key as ReactionKey] += 1;
+        }
     }
 
     return NextResponse.json({
-        messages: safeMessages.map((m) => ({ ...m, reactions: map.get(m.id) ?? emptyCounts() })),
+        messages: safeMessages.map((m) => shapeMessage(m, map.get(m.id) ?? emptyCounts())),
     });
 }
 
@@ -74,9 +75,7 @@ export async function POST(req: Request) {
         const author = (body.author ?? "").trim() || "Anonymous";
         const text = (body.body ?? "").trim();
 
-        if (!text) {
-            return NextResponse.json({ error: "Message is required" }, { status: 400 });
-        }
+        if (!text) return NextResponse.json({ error: "Message is required" }, { status: 400 });
 
         const { data, error } = await supabaseAdmin
             .from("messages")
@@ -86,8 +85,12 @@ export async function POST(req: Request) {
 
         if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-        // return with empty reaction counts so UI doesn't break
-        return NextResponse.json({ message: { ...data, reactions: emptyCounts() } }, { status: 201 });
+        const created = data as MessageRow;
+
+        return NextResponse.json(
+            { message: shapeMessage(created, emptyCounts()) },
+            { status: 201 }
+        );
     } catch {
         return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
     }
