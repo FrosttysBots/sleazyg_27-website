@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "./components/Navbar";
 import CursorGlow from "./components/CursorGlow";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export const metadata: Metadata = {
     title: "SleazyG_27 Hub",
@@ -57,6 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
                 <Footer />
                 <Analytics />
+                <SpeedInsights />
             </body>
         </html>
     );
