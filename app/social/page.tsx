@@ -1,5 +1,14 @@
 import "./social.css";
 import LazyEmbed from "../components/LazyEmbed";
+import {
+    TwitchIcon,
+    YouTubeIcon,
+    InstagramIcon,
+    TikTokIcon,
+    XIcon,
+    KickIcon,
+    SnapchatIcon,
+} from "../components/SocialIcons";
 
 type Platform = "twitch" | "kick" | "youtube" | "instagram" | "tiktok" | "x" | "snapchat";
 
@@ -89,91 +98,23 @@ const twitchEmbedSrc = `https://player.twitch.tv/?channel=SleazyG_27&parent=${TW
 const youtubeEmbedSrc = "https://www.youtube.com/embed/pLoDxSjqsZ8";
 
 function SocialIcon({ platform }: { platform: Platform }) {
+    const iconClass = "social-platform-icon";
+
     switch (platform) {
         case "twitch":
-            return (
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                        d="M4 3h16v10.5L16 17H12.5L10 19.5H8v-2.5H4V3z"
-                        fill="currentColor"
-                    />
-                    <path d="M14 7h2v5h-2zM10.5 7h2v5h-2z" fill="#000" />
-                </svg>
-            );
-
+            return <TwitchIcon className={iconClass} />;
         case "kick":
-            return (
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                        d="M6 5h4v6l5-6h5l-6.5 7.3L20 19h-5.2l-4-4.6-0.8.9V19H6V5z"
-                        fill="currentColor"
-                    />
-                </svg>
-            );
+            return <KickIcon className={iconClass} />;
         case "youtube":
-            return (
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                        d="M21 8.2s-.2-1.5-.8-2.1c-.8-.9-1.6-.9-2-1C15.7 5 12 5 12 5h0s-3.7 0-6.2.1c-.4 0-1.2.1-2 .9C3.2 6.7 3 8.2 3 8.2S2.8 9.9 2.8 11.6v1.7S3 15.9 3.8 16.6c.8.9 1.8.9 2.2 1 1.6.1 6 .1 6 .1s3.7 0 6.2-.1c.4 0 1.2-.1 2-.9.6-.6.8-2.3.8-2.3s.2-1.7.2-3.3v-1.7C21.2 9.9 21 8.2 21 8.2z"
-                        fill="currentColor"
-                    />
-                    <path d="M10 9l4 2.5-4 2.5z" fill="#000" />
-                </svg>
-            );
+            return <YouTubeIcon className={iconClass} />;
         case "instagram":
-            return (
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <rect
-                        x="3.5"
-                        y="3.5"
-                        width="17"
-                        height="17"
-                        rx="5"
-                        ry="5"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        fill="none"
-                    />
-                    <circle
-                        cx="12"
-                        cy="12"
-                        r="4"
-                        stroke="currentColor"
-                        strokeWidth="1.6"
-                        fill="none"
-                    />
-                    <circle cx="17" cy="7" r="1.3" fill="currentColor" />
-                </svg>
-            );
+            return <InstagramIcon className={iconClass} />;
         case "tiktok":
-            return (
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                        d="M14.5 5.5c.5 1.4 1.6 2.5 3 2.9V11c-1.2-.1-2.3-.6-3.2-1.4v4.7c0 2.5-1.9 4.5-4.4 4.7C7.9 19.2 6 17.4 6 15.1c0-2.4 1.9-4.3 4.3-4.4.4 0 .7 0 1 .1v2.3a2.1 2.1 0 00-1-.2c-1.1.1-1.9 1-1.9 2.1 0 1.2 1 2.1 2.2 2.1 1.1-.1 1.9-1 1.9-2.2V5.5h2z"
-                        fill="currentColor"
-                    />
-                </svg>
-            );
+            return <TikTokIcon className={iconClass} />;
         case "x":
-            return (
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                        d="M6 5l5 6.6L6.2 19H8l3.8-4.7L15 19h3l-5.2-6.9L18 5h-1.8l-3.6 4.5L10 5H6z"
-                        fill="currentColor"
-                    />
-                </svg>
-            );
-
+            return <XIcon className={iconClass} />;
         case "snapchat":
-            return (
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                        d="M12 2c2.6 0 4.7 2.1 4.7 4.7v3.2c0 .7.6 1.3 1.3 1.3h.5c.5 0 .9.4.9.9 0 .3-.2.6-.5.8-.6.3-1.3.4-2 .5-.4 1.7-1.5 3.2-3 4.1l.3 1.4c.1.5-.2 1-.7 1.1-.7.1-1.4.2-2.1.2s-1.4-.1-2.1-.2c-.5-.1-.8-.6-.7-1.1l.3-1.4c-1.5-.9-2.6-2.4-3-4.1-.7-.1-1.4-.2-2-.5-.3-.2-.5-.5-.5-.8 0-.5.4-.9.9-.9H6c.7 0 1.3-.6 1.3-1.3V6.7C7.3 4.1 9.4 2 12 2z"
-                        fill="currentColor"
-                    />
-                </svg>
-            );
-
+            return <SnapchatIcon className={iconClass} />;
         default:
             return null;
     }

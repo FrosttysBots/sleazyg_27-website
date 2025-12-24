@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import "./landing.css";
 import HomeExtras from "./components/HomeExtras";
 import LazyEmbed from "./components/LazyEmbed";
+import { ClipsIcon, CommunityIcon, SocialsIcon, DiscordIcon, TwitchIcon } from "./components/SocialIcons";
 
 type LastVod = {
     title: string;
@@ -187,7 +188,7 @@ export default function Home() {
                             rel="noreferrer"
                             className="esports-cta-primary"
                         >
-                            <span className="cta-icon">▶</span>
+                            <TwitchIcon className="cta-icon-svg" />
                             <span className="cta-text">
                                 {isLive ? 'JOIN STREAM' : 'FOLLOW CHANNEL'}
                             </span>
@@ -197,7 +198,9 @@ export default function Home() {
                         {/* Quick nav cards */}
                         <div className="esports-nav-grid">
                             <a href="/clips" className="esports-nav-card">
-                                <div className="nav-card-icon">🎬</div>
+                                <div className="nav-card-icon">
+                                    <ClipsIcon className="nav-icon-svg" />
+                                </div>
                                 <div className="nav-card-content">
                                     <span className="nav-card-title">CLIPS</span>
                                     <span className="nav-card-sub">Top Moments</span>
@@ -206,7 +209,9 @@ export default function Home() {
                             </a>
 
                             <a href="/community" className="esports-nav-card">
-                                <div className="nav-card-icon">💬</div>
+                                <div className="nav-card-icon">
+                                    <CommunityIcon className="nav-icon-svg" />
+                                </div>
                                 <div className="nav-card-content">
                                     <span className="nav-card-title">COMMUNITY</span>
                                     <span className="nav-card-sub">Messages & Strats</span>
@@ -215,7 +220,9 @@ export default function Home() {
                             </a>
 
                             <a href="/social" className="esports-nav-card">
-                                <div className="nav-card-icon">📱</div>
+                                <div className="nav-card-icon">
+                                    <SocialsIcon className="nav-icon-svg" />
+                                </div>
                                 <div className="nav-card-content">
                                     <span className="nav-card-title">SOCIALS</span>
                                     <span className="nav-card-sub">Stay Connected</span>
@@ -224,7 +231,9 @@ export default function Home() {
                             </a>
 
                             <a href="/discord" className="esports-nav-card esports-nav-card-discord">
-                                <div className="nav-card-icon">🎮</div>
+                                <div className="nav-card-icon">
+                                    <DiscordIcon className="nav-icon-svg" />
+                                </div>
                                 <div className="nav-card-content">
                                     <span className="nav-card-title">DISCORD</span>
                                     <span className="nav-card-sub">Join the Squad</span>

@@ -697,7 +697,7 @@ body {
 .footer-social-link {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     font-size: 0.75rem;
     font-weight: 600;
     padding: 8px 14px;
@@ -709,18 +709,57 @@ body {
     transition: all 0.25s ease;
 }
 
+.footer-social-svg {
+    width: 16px;
+    height: 16px;
+    transition: all 0.25s ease;
+}
+
+/* Platform-specific colors */
+.footer-social-twitch .footer-social-svg { color: #9146FF; }
+.footer-social-youtube .footer-social-svg { color: #FF0000; }
+.footer-social-instagram .footer-social-svg { color: #E4405F; }
+.footer-social-tiktok .footer-social-svg { color: #00F2EA; }
+.footer-social-x .footer-social-svg { color: #fff; }
+
+/* Base hover state */
+.footer-social-link:hover {
+    background: rgba(0, 42, 255, 0.15);
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+/* Hover states with platform colors */
+.footer-social-twitch:hover {
+    border-color: #9146FF;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3), 0 0 20px rgba(145, 70, 255, 0.3);
+}
+.footer-social-youtube:hover {
+    border-color: #FF0000;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 0, 0, 0.3);
+}
+.footer-social-instagram:hover {
+    border-color: #E4405F;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3), 0 0 20px rgba(228, 64, 95, 0.3);
+}
+.footer-social-tiktok:hover {
+    border-color: #00F2EA;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 242, 234, 0.3);
+}
+.footer-social-x:hover {
+    border-color: #fff;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+.footer-social-link:hover .footer-social-svg {
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 6px currentColor);
+}
+
 .footer-social-icon {
     font-size: 0.8rem;
     color: var(--sporty-accent-2);
     transition: all 0.25s ease;
-}
-
-.footer-social-link:hover {
-    background: rgba(0, 42, 255, 0.15);
-    border-color: var(--sporty-accent-2);
-    color: #fff;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 42, 255, 0.2);
 }
 
 .footer-social-link:hover .footer-social-icon {

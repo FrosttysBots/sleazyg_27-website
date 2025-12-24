@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 
 type Clip = {
     id: string;
@@ -38,6 +39,12 @@ export default function HomeExtras() {
     const [clips, setClips] = useState<Clip[]>([]);
     const [segments, setSegments] = useState<Segment[]>([]);
     const [activeClip, setActiveClip] = useState<Clip | null>(null);
+    const [isMounted, setIsMounted] = useState(false);
+
+    // Track client-side mounting for portal
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     const parentHost = useMemo(() => {
         // MUST be hostname only, e.g. "sleazyg27.me" or "sleazyg-27-website.vercel.app"
@@ -147,8 +154,8 @@ export default function HomeExtras() {
                 )}
             </div>
 
-            {/* Clip modal */}
-            {activeClip && (
+            {/* Clip modal - rendered via portal to escape stacking context */}
+            {activeClip && isMounted && createPortal(
                 <div
                     className="clip-modal"
                     role="dialog"
@@ -183,7 +190,8 @@ export default function HomeExtras() {
                             </a>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </section>
     );

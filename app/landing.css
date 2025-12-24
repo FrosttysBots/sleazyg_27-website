@@ -442,6 +442,19 @@
     font-size: 1.2rem;
 }
 
+.cta-icon-svg {
+    width: 22px;
+    height: 22px;
+    color: #fff;
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
+    transition: all 0.3s ease;
+}
+
+.esports-cta-primary:hover .cta-icon-svg {
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+    transform: scale(1.1);
+}
+
 .cta-arrow {
     font-size: 1.2rem;
     transition: transform 0.3s ease;
@@ -505,6 +518,27 @@
     justify-content: center;
     background: rgba(0, 42, 255, 0.2);
     border-radius: 10px;
+}
+
+.nav-icon-svg {
+    width: 18px;
+    height: 18px;
+    color: var(--sporty-accent-2);
+    transition: all 0.25s ease;
+}
+
+.esports-nav-card:hover .nav-icon-svg {
+    color: #fff;
+    filter: drop-shadow(0 0 6px var(--sporty-accent-2));
+}
+
+.esports-nav-card-discord .nav-icon-svg {
+    color: #5865F2;
+}
+
+.esports-nav-card-discord:hover .nav-icon-svg {
+    color: #fff;
+    filter: drop-shadow(0 0 6px #5865F2);
 }
 
 .nav-card-content {

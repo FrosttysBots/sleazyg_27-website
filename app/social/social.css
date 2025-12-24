@@ -496,6 +496,27 @@
     height: 20px;
 }
 
+/* Platform icon styling */
+.social-platform-icon {
+    width: 100%;
+    height: 100%;
+    transition: all 0.3s ease;
+}
+
+/* Platform-specific icon colors */
+.social-accent-purple .social-platform-icon { color: #9146FF; } /* Twitch */
+.social-accent-red .social-platform-icon { color: #FF0000; } /* YouTube */
+.social-accent-pink .social-platform-icon { color: #E4405F; } /* Instagram */
+.social-accent-green .social-platform-icon { color: #00F2EA; } /* TikTok/Kick */
+.social-accent-blue .social-platform-icon { color: #fff; } /* X */
+.social-accent-yellow .social-platform-icon { color: #FFFC00; } /* Snapchat */
+
+/* Glow effect on hover */
+.social-card:hover .social-platform-icon,
+.social-quick-link:hover .social-platform-icon {
+    filter: drop-shadow(0 0 8px currentColor);
+}
+
 /* Card header */
 .social-card-header {
     display: flex;

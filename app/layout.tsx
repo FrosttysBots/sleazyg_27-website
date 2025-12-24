@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "./components/Navbar";
 import CursorGlow from "./components/CursorGlow";
 import Preloader from "./components/Preloader";
+import FooterSocials from "./components/FooterSocials";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
@@ -43,31 +44,7 @@ function Footer() {
                 </nav>
 
                 {/* Socials */}
-                <div className="footer-socials">
-                    <span className="footer-socials-label">CONNECT</span>
-                    <div className="footer-socials-grid">
-                        <a href="https://twitch.tv/SleazyG_27" target="_blank" rel="noreferrer" className="footer-social-link">
-                            <span className="footer-social-icon">▶</span>
-                            <span>Twitch</span>
-                        </a>
-                        <a href="https://www.youtube.com/@buntbaby420" target="_blank" rel="noreferrer" className="footer-social-link">
-                            <span className="footer-social-icon">▷</span>
-                            <span>YouTube</span>
-                        </a>
-                        <a href="https://instagram.com/sleazyg_27" target="_blank" rel="noreferrer" className="footer-social-link">
-                            <span className="footer-social-icon">◇</span>
-                            <span>Instagram</span>
-                        </a>
-                        <a href="https://tiktok.com/@blunt_baby27" target="_blank" rel="noreferrer" className="footer-social-link">
-                            <span className="footer-social-icon">♪</span>
-                            <span>TikTok</span>
-                        </a>
-                        <a href="https://x.com/sportyg27" target="_blank" rel="noreferrer" className="footer-social-link">
-                            <span className="footer-social-icon">✕</span>
-                            <span>X</span>
-                        </a>
-                    </div>
-                </div>
+                <FooterSocials />
             </div>
 
             <div className="site-footer-bottom">
