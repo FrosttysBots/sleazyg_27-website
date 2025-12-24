@@ -170,6 +170,8 @@ export default function ClipsPage() {
                                             src={clip.thumbnailUrl}
                                             alt={clip.title}
                                             className="clip-thumb"
+                                            loading="lazy"
+                                            decoding="async"
                                         />
                                         <span className="clip-length-pill">
                                             {formatDuration(clip.duration)}

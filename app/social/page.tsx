@@ -1,5 +1,5 @@
-﻿import path from "path";
 import "./social.css";
+import LazyEmbed from "../components/LazyEmbed";
 
 type Platform = "twitch" | "kick" | "youtube" | "instagram" | "tiktok" | "x" | "snapchat";
 
@@ -296,11 +296,9 @@ export default function SocialPage() {
                             Watch the stream directly from your browser.
                         </p>
                         <div className="embed-frame-wrapper">
-                            <iframe
+                            <LazyEmbed
                                 className="embed-frame"
                                 src={twitchEmbedSrc}
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture"
-                                allowFullScreen
                                 title="Twitch preview"
                             />
                         </div>
@@ -313,11 +311,9 @@ export default function SocialPage() {
                             A peek at her latest video or playlist.
                         </p>
                         <div className="embed-frame-wrapper">
-                            <iframe
+                            <LazyEmbed
                                 className="embed-frame"
                                 src={youtubeEmbedSrc}
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture"
-                                allowFullScreen
                                 title="YouTube preview"
                             />
                         </div>

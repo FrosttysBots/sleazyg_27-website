@@ -111,7 +111,7 @@ export default function HomeExtras() {
                             title={c.title}
                         >
                             <div className="home-clip-thumb">
-                                <img src={c.thumbnailUrl} alt={c.title} />
+                                <img src={c.thumbnailUrl} alt={c.title} loading="lazy" decoding="async" />
                                 <span className="home-clip-play">▶</span>
                             </div>
                             <div className="home-clip-title">{c.title}</div>

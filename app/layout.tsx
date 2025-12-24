@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import CursorGlow from "./components/CursorGlow";
+import Preloader from "./components/Preloader";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
@@ -50,6 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     return (
         <html lang="en">
             <body>
+                <Preloader />
                 <Navbar />
                 <div id="cursor-glow" />
                 <CursorGlow />

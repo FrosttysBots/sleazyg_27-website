@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import "./landing.css";
 import HomeExtras from "./components/HomeExtras";
+import LazyEmbed from "./components/LazyEmbed";
 
 type LastVod = {
     title: string;
@@ -68,6 +69,8 @@ export default function Home() {
                 muted
                 loop
                 playsInline
+                preload="metadata"
+                poster="/videos/Sporty-Background-poster.jpg"
             />
 
             {/* Dark + color overlay for readability */}
@@ -174,7 +177,7 @@ export default function Home() {
 
                         <div className="live-body">
                             <div className="live-player-wrapper">
-                                <iframe
+                                <LazyEmbed
                                     className="live-player"
                                     src={
                                         "https://player.twitch.tv/?channel=SleazyG_27&parent=" +
@@ -182,7 +185,6 @@ export default function Home() {
                                         "&muted=true"
                                     }
                                     allow="autoplay; encrypted-media; picture-in-picture"
-                                    allowFullScreen
                                     title="SleazyG_27 Twitch channel"
                                 />
                             </div>
