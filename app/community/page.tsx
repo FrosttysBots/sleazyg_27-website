@@ -627,8 +627,9 @@ export default function CommunityPage() {
             </section>
 
             {/* Floating Action Button */}
-            <button type="button" className="fab" onClick={() => setIsModalOpen(true)} aria-label="Create">
-                +
+            <button type="button" className="fab" onClick={() => setIsModalOpen(true)} aria-label={tab === "messages" ? "Post a message" : "Add a strategy"}>
+                <span className="fab-icon">+</span>
+                <span className="fab-text">{tab === "messages" ? "Post Message" : "Add Strategy"}</span>
             </button>
 
             {/* Create Modal */}
