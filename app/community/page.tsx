@@ -70,6 +70,64 @@ function sumReactions(r: Record<ReactionKey, number>) {
     return Object.values(r).reduce((a, b) => a + b, 0);
 }
 
+const HOT_THRESHOLD = 8; // Posts with 8+ reactions get hot badge
+const CONFETTI_THRESHOLD = 15; // Crossing this triggers confetti
+
+/* ---------------------- PARTICLE BURST ---------------------- */
+function createParticleBurst(
+    container: HTMLElement,
+    reactionKey: ReactionKey,
+    count: number = 8
+) {
+    const rect = container.getBoundingClientRect();
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    for (let i = 0; i < count; i++) {
+        const particle = document.createElement("div");
+        particle.className = `particle particle-${reactionKey}`;
+
+        // Random direction
+        const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5;
+        const distance = 30 + Math.random() * 40;
+        const px = Math.cos(angle) * distance;
+        const py = Math.sin(angle) * distance;
+
+        particle.style.left = `${centerX}px`;
+        particle.style.top = `${centerY}px`;
+        particle.style.setProperty("--px", `${px}px`);
+        particle.style.setProperty("--py", `${py}px`);
+
+        container.appendChild(particle);
+
+        // Remove after animation
+        setTimeout(() => particle.remove(), 600);
+    }
+}
+
+/* ---------------------- CONFETTI BURST ---------------------- */
+function triggerConfetti() {
+    const container = document.createElement("div");
+    container.className = "confetti-container";
+    document.body.appendChild(container);
+
+    const colors = ["#002aff", "#22d3ee", "#a855f7", "#f97316", "#3b82f6", "#10b981"];
+
+    for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement("div");
+        confetti.className = "confetti";
+        confetti.style.left = `${Math.random() * 100}%`;
+        confetti.style.top = `${-10 - Math.random() * 20}%`;
+        confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDelay = `${Math.random() * 0.5}s`;
+        confetti.style.animationDuration = `${2 + Math.random() * 2}s`;
+        container.appendChild(confetti);
+    }
+
+    // Cleanup after animation
+    setTimeout(() => container.remove(), 4000);
+}
+
 /* ---------------------- RELATIVE TIME ---------------------- */
 
 function toDateMs(value: string | null | undefined) {
@@ -174,6 +232,12 @@ export default function CommunityPage() {
     const [formAction, setFormAction] = useState<Action>("Push");
     const [formDuration, setFormDuration] = useState<DurationRounds>(1);
     const [formDetails, setFormDetails] = useState("");
+
+    // Track newly created posts for highlight effect
+    const [newPostIds, setNewPostIds] = useState<Set<string>>(new Set());
+
+    // Track bouncing reaction buttons
+    const [bouncingBtns, setBouncingBtns] = useState<Set<string>>(new Set());
 
     // Touch UI detect (mobile)
     useEffect(() => {
@@ -356,11 +420,18 @@ export default function CommunityPage() {
 
     /* ---------------------- REACTIONS ---------------------- */
 
-    async function reactToPost(id: string, key: ReactionKey) {
+    async function reactToPost(id: string, key: ReactionKey, buttonElement?: HTMLElement) {
         const anonId = getAnonId();
 
         const current = userReactions[id] ?? null;
         const nextSelection: ReactionKey | null = current === key ? null : key;
+
+        // Get current total before change
+        const currentPost =
+            tab === "messages"
+                ? messages.find((m) => m.id === id)
+                : strategies.find((s) => s.id === id);
+        const prevTotal = currentPost ? sumReactions(currentPost.reactions) : 0;
 
         // optimistic UI
         const apply = (p: BasePost): BasePost => {
@@ -382,6 +453,25 @@ export default function CommunityPage() {
             return updated;
         });
 
+        // Trigger bounce animation on button
+        if (nextSelection && buttonElement) {
+            const btnKey = `${id}-${key}`;
+            setBouncingBtns((prev) => new Set(prev).add(btnKey));
+            setTimeout(() => {
+                setBouncingBtns((prev) => {
+                    const next = new Set(prev);
+                    next.delete(btnKey);
+                    return next;
+                });
+            }, 400);
+
+            // Particle burst effect
+            const particleContainer = buttonElement.closest(".reactions-wrap");
+            if (particleContainer) {
+                createParticleBurst(particleContainer as HTMLElement, key, 6);
+            }
+        }
+
         // persist
         try {
             const res = await fetch("/api/community/reactions", {
@@ -401,6 +491,12 @@ export default function CommunityPage() {
             }
 
             const data = await safeJson<{ counts: Record<ReactionKey, number> }>(res);
+            const newTotal = sumReactions(data.counts);
+
+            // Trigger confetti if crossing threshold!
+            if (prevTotal < CONFETTI_THRESHOLD && newTotal >= CONFETTI_THRESHOLD) {
+                triggerConfetti();
+            }
 
             const applyCounts = (p: BasePost) => (p.id === id ? { ...p, reactions: data.counts } : p);
             if (tab === "messages") setMessages((prev) => prev.map(applyCounts));
@@ -429,6 +525,16 @@ export default function CommunityPage() {
 
                 const data = await safeJson<{ message: BasePost }>(res);
                 setMessages((prev) => [data.message, ...prev]);
+
+                // Track as new for highlight effect
+                setNewPostIds((prev) => new Set(prev).add(data.message.id));
+                setTimeout(() => {
+                    setNewPostIds((prev) => {
+                        const next = new Set(prev);
+                        next.delete(data.message.id);
+                        return next;
+                    });
+                }, 2000);
             } else {
                 const res = await fetch("/api/community/strategies", {
                     method: "POST",
@@ -450,6 +556,16 @@ export default function CommunityPage() {
 
                 const data = await safeJson<{ strategy: Strategy }>(res);
                 setStrategies((prev) => [data.strategy, ...prev]);
+
+                // Track as new for highlight effect
+                setNewPostIds((prev) => new Set(prev).add(data.strategy.id));
+                setTimeout(() => {
+                    setNewPostIds((prev) => {
+                        const next = new Set(prev);
+                        next.delete(data.strategy.id);
+                        return next;
+                    });
+                }, 2000);
             }
 
             // reset + close
@@ -523,9 +639,28 @@ export default function CommunityPage() {
                     {items.map((post) => {
                         const isStrategy = tab === "strategies";
                         const s = post as Strategy;
+                        const totalReactions = sumReactions(post.reactions);
+                        const isHot = totalReactions >= HOT_THRESHOLD;
+                        const isNew = newPostIds.has(post.id);
+
+                        const cardClasses = [
+                            "board-card",
+                            isStrategy && "board-card-strategy",
+                            isNew && "board-card-new",
+                        ]
+                            .filter(Boolean)
+                            .join(" ");
 
                         return (
-                            <article key={post.id} className={"board-card" + (isStrategy ? " board-card-strategy" : "")}>
+                            <article key={post.id} className={cardClasses}>
+                                {/* Hot badge for popular posts */}
+                                {isHot && (
+                                    <div className="hot-badge">
+                                        <span className="hot-badge-icon">🔥</span>
+                                        <span>HOT</span>
+                                    </div>
+                                )}
+
                                 {isStrategy && (
                                     <div className="strategy-top">
                                         <div className="strategy-title">{s.title}</div>
@@ -549,13 +684,23 @@ export default function CommunityPage() {
                                     </div>
 
                                     <div className="reactions reactions-wrap">
-                                        {REACTIONS.map((r) => (
+                                        {REACTIONS.map((r) => {
+                                            const btnKey = `${post.id}-${r.key}`;
+                                            const isBouncing = bouncingBtns.has(btnKey);
+                                            const btnClasses = [
+                                                "react-btn",
+                                                `react-${r.key}`,
+                                                userReactions[post.id] === r.key && "react-btn-active",
+                                                isBouncing && "react-btn-bounce",
+                                            ]
+                                                .filter(Boolean)
+                                                .join(" ");
+
+                                            return (
                                             <button
                                                 key={r.key}
                                                 type="button"
-                                                className={
-                                                    "react-btn react-" + r.key + (userReactions[post.id] === r.key ? " react-btn-active" : "")
-                                                }
+                                                className={btnClasses}
                                                 // Mobile-only long press
                                                 onPointerDown={() => {
                                                     if (!isTouchUi) return;
@@ -579,7 +724,7 @@ export default function CommunityPage() {
                                                         e.stopPropagation();
                                                         return;
                                                     }
-                                                    reactToPost(post.id, r.key);
+                                                    reactToPost(post.id, r.key, e.currentTarget);
                                                 }}
                                                 aria-label={`React ${r.label}`}
                                                 title={r.label}
@@ -595,7 +740,8 @@ export default function CommunityPage() {
                                                     {post.reactions?.[r.key] ?? 0}
                                                 </span>
                                             </button>
-                                        ))}
+                                            );
+                                        })}
 
                                         {isTouchUi && pickerPostId === post.id && (
                                             <div className="reaction-picker" role="menu" aria-label="Choose reaction">

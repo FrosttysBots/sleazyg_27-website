@@ -14,35 +14,76 @@ export const metadata: Metadata = {
 function Footer() {
     return (
         <footer className="site-footer">
+            {/* Animated top border */}
+            <div className="footer-border-glow" />
+
             <div className="site-footer-inner">
+                {/* Brand section */}
                 <div className="footer-brand">
-                    <span className="footer-logo-dot" />
+                    <div className="footer-logo-container">
+                        <span className="footer-logo-dot" />
+                        <span className="footer-logo-ring" />
+                    </div>
                     <div className="footer-brand-text">
-                        <span className="footer-brand-name">SleazyG_27</span>
-                        <span className="footer-brand-sub">Valorant - Variety - Community</span>
+                        <span className="footer-brand-name">SLEAZYG_27</span>
+                        <span className="footer-brand-sub">VALORANT // VARIETY // COMMUNITY</span>
                     </div>
                 </div>
 
+                {/* Navigation */}
                 <nav className="footer-links">
-                    <a href="/">Home</a>
-                    <a href="/clips">Clips</a>
-                    <a href="/social">Socials</a>
-                    <a href="/discord">Discord</a>
+                    <span className="footer-links-label">NAVIGATE</span>
+                    <div className="footer-links-grid">
+                        <a href="/">Home</a>
+                        <a href="/clips">Clips</a>
+                        <a href="/community">Community</a>
+                        <a href="/social">Socials</a>
+                        <a href="/discord">Discord</a>
+                    </div>
                 </nav>
 
+                {/* Socials */}
                 <div className="footer-socials">
-                    <a href="https://twitch.tv/SleazyG_27" target="_blank" rel="noreferrer">Twitch</a>
-                    <a href="https://www.youtube.com/@buntbaby420" target="_blank" rel="noreferrer">YouTube</a>
-                    <a href="https://instagram.com/sleazyg_27" target="_blank" rel="noreferrer">Instagram</a>
-                    <a href="https://tiktok.com/@blunt_baby27" target="_blank" rel="noreferrer">TikTok</a>
-                    <a href="https://x.com/sportyg27" target="_blank" rel="noreferrer">X</a>
+                    <span className="footer-socials-label">CONNECT</span>
+                    <div className="footer-socials-grid">
+                        <a href="https://twitch.tv/SleazyG_27" target="_blank" rel="noreferrer" className="footer-social-link">
+                            <span className="footer-social-icon">▶</span>
+                            <span>Twitch</span>
+                        </a>
+                        <a href="https://www.youtube.com/@buntbaby420" target="_blank" rel="noreferrer" className="footer-social-link">
+                            <span className="footer-social-icon">▷</span>
+                            <span>YouTube</span>
+                        </a>
+                        <a href="https://instagram.com/sleazyg_27" target="_blank" rel="noreferrer" className="footer-social-link">
+                            <span className="footer-social-icon">◇</span>
+                            <span>Instagram</span>
+                        </a>
+                        <a href="https://tiktok.com/@blunt_baby27" target="_blank" rel="noreferrer" className="footer-social-link">
+                            <span className="footer-social-icon">♪</span>
+                            <span>TikTok</span>
+                        </a>
+                        <a href="https://x.com/sportyg27" target="_blank" rel="noreferrer" className="footer-social-link">
+                            <span className="footer-social-icon">✕</span>
+                            <span>X</span>
+                        </a>
+                    </div>
                 </div>
             </div>
 
             <div className="site-footer-bottom">
-                <span>&copy; {new Date().getFullYear()} SleazyG_27. All rights reserved.</span>
-                <span className="footer-made-by">Built with love by Frostty.</span>
+                <div className="footer-bottom-left">
+                    <span className="footer-copyright">&copy; {new Date().getFullYear()} SleazyG_27</span>
+                    <span className="footer-divider">|</span>
+                    <span className="footer-tagline">Stream. Play. Connect.</span>
+                </div>
+                <span className="footer-made-by">
+                    Built with <span className="footer-heart">♥</span> by Frostty
+                </span>
             </div>
+
+            {/* HUD corner decorations */}
+            <div className="footer-corner footer-corner-bl" />
+            <div className="footer-corner footer-corner-br" />
         </footer>
     );
 }
