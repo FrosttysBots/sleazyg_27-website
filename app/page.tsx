@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import "./landing.css";
 import HomeExtras from "./components/HomeExtras";
 import LazyEmbed from "./components/LazyEmbed";
-import { ClipsIcon, CommunityIcon, SocialsIcon, DiscordIcon, TwitchIcon } from "./components/SocialIcons";
 
 type LastVod = {
     title: string;
@@ -27,7 +26,13 @@ type LiveStatus = {
 export default function Home() {
     const [liveStatus, setLiveStatus] = useState<LiveStatus | null>(null);
     const [liveLoading, setLiveLoading] = useState(true);
-    const [uptime, setUptime] = useState("");
+
+    const handleExploreClick = () => {
+        const section = document.getElementById("hub-section");
+        if (section) {
+            section.scrollIntoView({ behavior: "smooth" });
+        }
+    };
 
     useEffect(() => {
         async function fetchLive() {
@@ -48,27 +53,6 @@ export default function Home() {
         return () => clearInterval(interval);
     }, []);
 
-    // Calculate uptime
-    useEffect(() => {
-        if (!liveStatus?.live || !liveStatus?.startedAt) {
-            setUptime("");
-            return;
-        }
-
-        const updateUptime = () => {
-            const start = new Date(liveStatus.startedAt!).getTime();
-            const now = Date.now();
-            const diff = now - start;
-            const hours = Math.floor(diff / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            setUptime(`${hours}h ${minutes}m`);
-        };
-
-        updateUptime();
-        const interval = setInterval(updateUptime, 60000);
-        return () => clearInterval(interval);
-    }, [liveStatus?.live, liveStatus?.startedAt]);
-
     const isLive = !!liveStatus?.live;
     const hasVod = !isLive && !!liveStatus?.lastVod;
     const vod = liveStatus?.lastVod;
@@ -76,204 +60,209 @@ export default function Home() {
         typeof window !== "undefined" ? window.location.hostname : "localhost";
 
     return (
-        <main className="esports-landing">
-            {/* Animated background grid */}
-            <div className="esports-grid-bg" />
+        <main className="landing-container">
+            {/* Background Video */}
+            <video
+                className="bg-video"
+                src="/videos/Sporty-Background.mp4"
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                poster="/videos/Sporty-Background-poster.jpg"
+            />
 
-            {/* Scanline overlay */}
-            <div className="esports-scanlines" />
+            {/* Dark + color overlay for readability */}
+            <div className="landing-overlay" />
 
-            {/* Hero Section - Stream Focus */}
-            <section className="esports-hero">
-                {/* Top bar with branding */}
-                <div className="esports-topbar">
-                    <div className="esports-brand">
-                        <span className="esports-brand-icon">◆</span>
-                        <span className="esports-brand-name">SLEAZYG_27</span>
+            {/* Foreground content */}
+            <div className="hero-layout">
+                <section className="hero-content">
+                    <p className="hero-kicker">Valorant / Variety / Community</p>
+
+                    <h1 className="hero-title">SleazyG_27</h1>
+
+                    <p className="hero-subtitle">
+                        Clutches, chaos, and comfy vibes. Catch the next spike defuse, or
+                        dive into the best moments from stream.
+                    </p>
+
+                    <div className="hero-actions">
+                        <a
+                            href="https://twitch.tv/SleazyG_27"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="hero-btn hero-btn-primary"
+                        >
+                            <span>Watch live on Twitch</span>
+                        </a>
+
+                        <button
+                            type="button"
+                            className="hero-btn hero-btn-ghost"
+                            onClick={handleExploreClick}
+                        >
+                            Explore the hub
+                        </button>
                     </div>
-                    <div className="esports-tagline">
-                        VALORANT // VARIETY // COMMUNITY
+
+                    <div className="hero-pills">
+                        <span className="hero-pill">Ranked grind</span>
+                        <span className="hero-pill">Community games</span>
+                        <span className="hero-pill">Chill vibes</span>
                     </div>
-                </div>
+                </section>
 
-                {/* Main content grid */}
-                <div className="esports-main">
-                    {/* Left side - Stream player */}
-                    <div className="esports-player-section">
-                        {/* HUD Frame */}
-                        <div className="hud-frame">
-                            <div className="hud-corner hud-corner-tl" />
-                            <div className="hud-corner hud-corner-tr" />
-                            <div className="hud-corner hud-corner-bl" />
-                            <div className="hud-corner hud-corner-br" />
+                {/* Right side: quick hub preview */}
+                <aside className="hero-preview">
+                    <div className="preview-card">
+                        <h2 className="preview-title">Clips and highlights</h2>
+                        <p className="preview-text">
+                            Hover to preview Twitch clips, see the best plays, whiffs, and
+                            close rounds.
+                        </p>
+                    </div>
 
-                            {/* Status badge */}
-                            <div className={`hud-status ${isLive ? 'hud-status-live' : 'hud-status-offline'}`}>
-                                <span className="hud-status-dot" />
-                                <span className="hud-status-text">
-                                    {isLive ? 'LIVE' : 'OFFLINE'}
-                                </span>
-                            </div>
+                    <div className="preview-grid">
+                        <a href="/clips" className="preview-chip">
+                            <span className="preview-chip-label">Clips</span>
+                            <span className="preview-chip-sub">Top Twitch moments</span>
+                        </a>
+                        <a href="/social" className="preview-chip">
+                            <span className="preview-chip-label">Socials</span>
+                            <span className="preview-chip-sub">Stay in the loop</span>
+                        </a>
+                        <a href="/discord" className="preview-chip">
+                            <span className="preview-chip-label">Discord</span>
+                            <span className="preview-chip-sub">Join the squad</span>
+                        </a>
+                    </div>
+                </aside>
+            </div>
 
-                            {/* Player wrapper */}
-                            <div className="esports-player-wrapper">
-                                {liveLoading ? (
-                                    <div className="esports-player-loading">
-                                        <div className="loading-spinner" />
-                                        <span>CONNECTING...</span>
-                                    </div>
-                                ) : (
-                                    <LazyEmbed
-                                        className="esports-player"
-                                        src={
-                                            "https://player.twitch.tv/?channel=SleazyG_27&parent=" +
-                                            encodeURIComponent(twitchParent) +
-                                            "&muted=true"
-                                        }
-                                        allow="autoplay; encrypted-media; picture-in-picture"
-                                        title="SleazyG_27 Twitch channel"
-                                    />
-                                )}
-                            </div>
+            {/* Live or last stream section */}
+            {!liveLoading && (
+                <section className="live-section">
+                    <div className="live-card">
+                        <div className="live-header">
+                            {isLive ? (
+                                <span className="live-pill-hero">Live now</span>
+                            ) : (
+                                <span className="live-pill-offline">Offline</span>
+                            )}
 
-                            {/* Bottom info bar */}
-                            <div className="hud-info-bar">
-                                <div className="hud-info-item">
-                                    <span className="hud-info-label">GAME</span>
-                                    <span className="hud-info-value">
-                                        {isLive ? (liveStatus?.gameName || 'Just Chatting') : (hasVod ? 'Last Stream' : '—')}
-                                    </span>
-                                </div>
-                                <div className="hud-info-divider" />
-                                <div className="hud-info-item">
-                                    <span className="hud-info-label">
-                                        {isLive ? 'VIEWERS' : 'DATE'}
-                                    </span>
-                                    <span className="hud-info-value hud-info-highlight">
-                                        {isLive
-                                            ? (liveStatus?.viewerCount?.toLocaleString() || '—')
-                                            : (hasVod ? new Date(vod!.createdAt).toLocaleDateString() : '—')
-                                        }
-                                    </span>
-                                </div>
-                                {isLive && uptime && (
+                            <div className="live-meta-main">
+                                {isLive ? (
                                     <>
-                                        <div className="hud-info-divider" />
-                                        <div className="hud-info-item">
-                                            <span className="hud-info-label">UPTIME</span>
-                                            <span className="hud-info-value">{uptime}</span>
-                                        </div>
+                                        <span className="live-title">
+                                            {liveStatus?.title || "Live on Twitch"}
+                                        </span>
+                                        <span className="live-subtitle">
+                                            {liveStatus?.gameName
+                                                ? "Playing " + liveStatus.gameName
+                                                : "Hanging out with chat"}
+                                        </span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span className="live-title">Last stream</span>
+                                        <span className="live-subtitle">
+                                            {vod?.title || "Catch up on the latest broadcast."}
+                                        </span>
                                     </>
                                 )}
                             </div>
                         </div>
 
-                        {/* Stream title below player */}
-                        <div className="esports-stream-title">
-                            <span className="stream-title-text">
-                                {isLive
-                                    ? (liveStatus?.title || 'Live on Twitch')
-                                    : (hasVod ? vod!.title : 'Stream offline - Check back soon!')
-                                }
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* Right side - Quick actions */}
-                    <div className="esports-sidebar">
-                        {/* Primary CTA */}
-                        <a
-                            href="https://twitch.tv/SleazyG_27"
-                            target="_blank"
-                            rel="noreferrer"
-                            className="esports-cta-primary"
-                        >
-                            <TwitchIcon className="cta-icon-svg" />
-                            <span className="cta-text">
-                                {isLive ? 'JOIN STREAM' : 'FOLLOW CHANNEL'}
-                            </span>
-                            <span className="cta-arrow">→</span>
-                        </a>
-
-                        {/* Quick nav cards */}
-                        <div className="esports-nav-grid">
-                            <a href="/clips" className="esports-nav-card">
-                                <div className="nav-card-icon">
-                                    <ClipsIcon className="nav-icon-svg" />
-                                </div>
-                                <div className="nav-card-content">
-                                    <span className="nav-card-title">CLIPS</span>
-                                    <span className="nav-card-sub">Top Moments</span>
-                                </div>
-                                <div className="nav-card-arrow">›</div>
-                            </a>
-
-                            <a href="/community" className="esports-nav-card">
-                                <div className="nav-card-icon">
-                                    <CommunityIcon className="nav-icon-svg" />
-                                </div>
-                                <div className="nav-card-content">
-                                    <span className="nav-card-title">COMMUNITY</span>
-                                    <span className="nav-card-sub">Messages & Strats</span>
-                                </div>
-                                <div className="nav-card-arrow">›</div>
-                            </a>
-
-                            <a href="/social" className="esports-nav-card">
-                                <div className="nav-card-icon">
-                                    <SocialsIcon className="nav-icon-svg" />
-                                </div>
-                                <div className="nav-card-content">
-                                    <span className="nav-card-title">SOCIALS</span>
-                                    <span className="nav-card-sub">Stay Connected</span>
-                                </div>
-                                <div className="nav-card-arrow">›</div>
-                            </a>
-
-                            <a href="/discord" className="esports-nav-card esports-nav-card-discord">
-                                <div className="nav-card-icon">
-                                    <DiscordIcon className="nav-icon-svg" />
-                                </div>
-                                <div className="nav-card-content">
-                                    <span className="nav-card-title">DISCORD</span>
-                                    <span className="nav-card-sub">Join the Squad</span>
-                                </div>
-                                <div className="nav-card-arrow">›</div>
-                            </a>
-                        </div>
-
-                        {/* Stats panel */}
-                        <div className="esports-stats-panel">
-                            <div className="stats-header">
-                                <span className="stats-header-icon">◇</span>
-                                <span>QUICK STATS</span>
+                        <div className="live-body">
+                            <div className="live-player-wrapper">
+                                <LazyEmbed
+                                    className="live-player"
+                                    src={
+                                        "https://player.twitch.tv/?channel=SleazyG_27&parent=" +
+                                        encodeURIComponent(twitchParent) +
+                                        "&muted=true"
+                                    }
+                                    allow="autoplay; encrypted-media; picture-in-picture"
+                                    title="SleazyG_27 Twitch channel"
+                                />
                             </div>
-                            <div className="stats-grid">
-                                <div className="stat-item">
-                                    <span className="stat-value">VAL</span>
-                                    <span className="stat-label">Main Game</span>
-                                </div>
-                                <div className="stat-item">
-                                    <span className="stat-value">CHILL</span>
-                                    <span className="stat-label">Vibes</span>
-                                </div>
+                            <div className="live-side-meta">
+                                {isLive && typeof liveStatus?.viewerCount === "number" && (
+                                    <div className="live-viewers">
+                                        <span className="live-viewers-label">Viewers</span>
+                                        <span className="live-viewers-count">
+                                            {liveStatus.viewerCount}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {!isLive && vod && (
+                                    <div className="live-viewers">
+                                        <span className="live-viewers-label">Last stream date</span>
+                                        <span className="live-viewers-count">
+                                            {new Date(vod.createdAt).toLocaleDateString()}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {isLive ? (
+                                    <a
+                                        href="https://twitch.tv/SleazyG_27"
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="live-watch-link"
+                                    >
+                                        Open stream on Twitch
+                                    </a>
+                                ) : (
+                                    vod && (
+                                        <a
+                                            href={vod.url}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="live-watch-link"
+                                        >
+                                            Watch last stream
+                                        </a>
+                                    )
+                                )}
                             </div>
                         </div>
                     </div>
+                </section>
+            )}
+
+            {/* Lower section anchor for smooth scroll */}
+            <section id="hub-section" className="hub-section">
+                <h2 className="hub-title">Welcome to the SleazyG hub</h2>
+                <p className="hub-subtitle">
+                    Everything in one place: clips, socials, and the community Discord.
+                </p>
+
+                <div className="hub-grid">
+                    <a href="/clips" className="hub-card">
+                        <h3>Watch clips</h3>
+                        <p>Preview Twitch clips on hover and jump into the best moments.</p>
+                    </a>
+                    <a href="/social" className="hub-card">
+                        <h3>Follow the journey</h3>
+                        <p>
+                            Twitch, TikTok, Instagram and more. Never miss an update or
+                            stream.
+                        </p>
+                    </a>
+                    <a href="/discord" className="hub-card">
+                        <h3>Join the Discord</h3>
+                        <p>
+                            Hang out off stream, find teammates, and share your own plays and
+                            memes.
+                        </p>
+                    </a>
                 </div>
             </section>
-
-            {/* Angled divider */}
-            <div className="esports-divider">
-                <div className="divider-line" />
-                <span className="divider-text">FEATURED CONTENT</span>
-                <div className="divider-line" />
-            </div>
-
-            {/* Featured section */}
-            <section className="esports-featured">
-                <HomeExtras />
-            </section>
+            <HomeExtras />
         </main>
     );
 }

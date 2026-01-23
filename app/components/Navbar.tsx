@@ -42,6 +42,7 @@ export default function Navbar() {
         () => [
             { href: "/", label: "Home" },
             { href: "/clips", label: "Clips" },
+            { href: "/stats", label: "Stats" },
             { href: "/community", label: "Community"},
             { href: "/social", label: "Socials" },
             { href: "/discord", label: "Discord" },
